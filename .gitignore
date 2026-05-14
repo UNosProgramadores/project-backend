@@ -1,0 +1,116 @@
+######################################
+# IDEs
+######################################
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+out/
+
+# VS Code
+.vscode/
+.history/
+
+# Eclipse
+.project
+.classpath
+.settings/
+bin/
+
+# NetBeans
+nbproject/private/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
+
+######################################
+# OS Files
+######################################
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+######################################
+# Logs
+######################################
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+######################################
+# Temporary files
+######################################
+*.tmp
+*.swp
+*.swo
+*~
+*.bak
+
+######################################
+# Dependency directories
+######################################
+
+# Java / Gradle
+.gradle/
+build/
+
+# Maven
+target/
+
+# Java compiled files
+*.class
+*.jar
+*.war
+*.ear
+
+# JVM crash logs
+hs_err_pid*
+replay_pid*
+
+######################################
+# Spring Boot config (SENSIBLE)
+######################################
+application-local.properties
+application-dev.properties
+application-prod.properties
+
+
+######################################
+# Environment variables
+######################################
+.env
+.env.local
+.env.*.local
+
+######################################
+# Database files / dumps
+######################################
+*.sql
+*.dump
+*.backup
+
+# H2 database (si la usas en local)
+*.h2.db
+*.mv.db
+
+######################################
+# Docker (opcional)
+######################################
+docker-compose.override.yml
+
+######################################
+# Coverage / tests
+######################################
+coverage/
