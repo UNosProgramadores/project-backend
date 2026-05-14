@@ -97,7 +97,6 @@ application-prod.properties
 ######################################
 # Database files / dumps
 ######################################
-*.sql
 *.dump
 *.backup
 
