@@ -1,136 +1,136 @@
-CREATE TABLE "rol" (
-                       "id" int PRIMARY KEY,
-                       "nombre" varchar UNIQUE,
-                       "descripcion" varchar
-);
-
-CREATE TABLE "usuario" (
-                           "id" int PRIMARY KEY,
-                           "cedula" varchar UNIQUE NOT NULL,
-                           "nombre" varchar NOT NULL,
-                           "celular" varchar,
-                           "nombre_usuario" varchar UNIQUE,
-                           "contrasena_hash" varchar NOT NULL,
-                           "rol_id" int NOT NULL,
-                           "activo" boolean,
-                           "intentos_fallidos" int,
-                           "bloqueado" boolean,
-                           "fecha_registro" timestamp
-);
-
-CREATE TABLE "tipo_vehiculo" (
-                                 "id" int PRIMARY KEY,
-                                 "nombre" varchar UNIQUE,
-                                 "requiere_placa" boolean
-);
-
-CREATE TABLE "vehiculo" (
-                            "id" int PRIMARY KEY,
-                            "tipo_vehiculo_id" int,
-                            "placa" varchar UNIQUE,
-                            "registro_bici" varchar UNIQUE,
-                            "propietario_id" int,
-                            "marca" varchar,
-                            "modelo" varchar,
-                            "color" varchar,
-                            "activo" boolean
-);
-
-CREATE TABLE "parqueadero" (
-                               "id" int PRIMARY KEY,
-                               "nombre" varchar,
-                               "direccion" varchar,
-                               "hora_apertura" timestamp,
-                               "hora_cierre" timestamp,
-                               "filas" int,
-                               "columnas" int,
-                               "asignacion_automatica" boolean,
-                               "descuentos_activos" boolean
-);
-
-CREATE TABLE "celda" (
-                         "id" int PRIMARY KEY,
-                         "parqueadero_id" int NOT NULL,
-                         "fila" int,
-                         "columna" int,
-                         "nombre" varchar,
-                         "tipo_celda" varchar,
-                         "estado" varchar,
-                         "tipo_vehiculo_id" int,
-                         "reservada_trabajador" boolean
-);
-
-CREATE TABLE "tarifa" (
-                          "id" int PRIMARY KEY,
-                          "parqueadero_id" int NOT NULL,
-                          "tipo_vehiculo_id" int,
-                          "tipo_tarifa" varchar,
-                          "valor" decimal,
-                          "fecha_inicio" timestamp,
-                          "fecha_fin" timestamp,
-                          "activa" boolean
-);
-
-CREATE TABLE "configuracion_descuento" (
-                                           "id" int PRIMARY KEY,
-                                           "parqueadero_id" int,
-                                           "activo" boolean,
-                                           "monto_minimo_factura_externa" decimal,
-                                           "numero_minimo_visitas" int,
-                                           "porcentaje_descuento" decimal,
-                                           "fecha_inicio" timestamp,
-                                           "fecha_fin" timestamp
-);
-
-CREATE TABLE "registro" (
-                            "id" int PRIMARY KEY,
-                            "vehiculo_id" int NOT NULL,
-                            "celda_id" int NOT NULL,
-                            "fecha_hora_ingreso" timestamp,
-                            "fecha_hora_salida" timestamp,
-                            "tiempo_permanencia_min" int,
-                            "estado" varchar
-);
-
-CREATE TABLE "factura" (
-                           "id" int PRIMARY KEY,
-                           "pago_id" int UNIQUE,
-                           "numero_factura" varchar UNIQUE,
-                           "fecha_emision" timestamp
-);
-
-CREATE TABLE "pago" (
+CREATE TABLE "role" (
                         "id" int PRIMARY KEY,
-                        "ingreso_id" int UNIQUE,
-                        "subtotal" decimal,
-                        "porcentaje_descuento" decimal,
-                        "valor_descuento" decimal,
-                        "total_pagado" decimal,
-                        "metodo_pago" varchar,
-                        "fecha_pago" timestamp,
-                        "factura_externa_ref" varchar
+                        "name" varchar UNIQUE,
+                        "description" varchar
 );
 
-ALTER TABLE "usuario" ADD FOREIGN KEY ("rol_id") REFERENCES "rol" ("id") DEFERRABLE INITIALLY IMMEDIATE;
+CREATE TABLE "user" (
+                        "id" int PRIMARY KEY,
+                        "document" varchar UNIQUE NOT NULL,
+                        "name" varchar NOT NULL,
+                        "phone" varchar,
+                        "username" varchar UNIQUE,
+                        "password_hash" varchar NOT NULL,
+                        "role_id" int NOT NULL,
+                        "active" boolean,
+                        "failed_attempts" int,
+                        "blocked" boolean,
+                        "created_at" timestamp
+);
 
-ALTER TABLE "vehiculo" ADD FOREIGN KEY ("tipo_vehiculo_id") REFERENCES "tipo_vehiculo" ("id") DEFERRABLE INITIALLY IMMEDIATE;
+CREATE TABLE "vehicle_type" (
+                                "id" int PRIMARY KEY,
+                                "name" varchar UNIQUE,
+                                "requires_plate" boolean
+);
 
-ALTER TABLE "vehiculo" ADD FOREIGN KEY ("propietario_id") REFERENCES "usuario" ("id") DEFERRABLE INITIALLY IMMEDIATE;
+CREATE TABLE "vehicle" (
+                           "id" int PRIMARY KEY,
+                           "vehicle_type_id" int,
+                           "plate" varchar UNIQUE,
+                           "bike_registration" varchar UNIQUE,
+                           "owner_id" int,
+                           "brand" varchar,
+                           "model" varchar,
+                           "color" varchar,
+                           "active" boolean
+);
 
-ALTER TABLE "celda" ADD FOREIGN KEY ("parqueadero_id") REFERENCES "parqueadero" ("id") DEFERRABLE INITIALLY IMMEDIATE;
+CREATE TABLE "parking_lot" (
+                               "id" int PRIMARY KEY,
+                               "name" varchar,
+                               "address" varchar,
+                               "opening_time" time,
+                               "closing_time" time,
+                               "rows" int,
+                               "columns" int,
+                               "auto_assignment" boolean,
+                               "discounts_enabled" boolean
+);
 
-ALTER TABLE "celda" ADD FOREIGN KEY ("tipo_vehiculo_id") REFERENCES "tipo_vehiculo" ("id") DEFERRABLE INITIALLY IMMEDIATE;
+CREATE TABLE "cell" (
+                        "id" int PRIMARY KEY,
+                        "parking_lot_id" int NOT NULL,
+                        "row" int,
+                        "col" int,
+                        "code" varchar,
+                        "cell_type" varchar,
+                        "status" varchar,
+                        "vehicle_type_id" int,
+                        "reserved_for_staff" boolean
+);
 
-ALTER TABLE "tarifa" ADD FOREIGN KEY ("parqueadero_id") REFERENCES "parqueadero" ("id") DEFERRABLE INITIALLY IMMEDIATE;
+CREATE TABLE "rate" (
+                        "id" int PRIMARY KEY,
+                        "parking_lot_id" int NOT NULL,
+                        "vehicle_type_id" int,
+                        "rate_type" varchar,
+                        "cost" decimal,
+                        "start_date" timestamp,
+                        "end_date" timestamp,
+                        "active" boolean
+);
 
-ALTER TABLE "tarifa" ADD FOREIGN KEY ("tipo_vehiculo_id") REFERENCES "tipo_vehiculo" ("id") DEFERRABLE INITIALLY IMMEDIATE;
+CREATE TABLE "discount_config" (
+                                   "id" int PRIMARY KEY,
+                                   "parking_lot_id" int,
+                                   "active" boolean,
+                                   "min_external_invoice" decimal,
+                                   "min_visits" int,
+                                   "discount_percentage" decimal,
+                                   "start_date" timestamp,
+                                   "end_date" timestamp
+);
 
-ALTER TABLE "configuracion_descuento" ADD FOREIGN KEY ("parqueadero_id") REFERENCES "parqueadero" ("id") DEFERRABLE INITIALLY IMMEDIATE;
+CREATE TABLE "entry_record" (
+                                "id" int PRIMARY KEY,
+                                "vehicle_id" int NOT NULL,
+                                "cell_id" int NOT NULL,
+                                "entry_time" timestamp,
+                                "exit_time" timestamp,
+                                "duration" int,
+                                "status" varchar
+);
 
-ALTER TABLE "registro" ADD FOREIGN KEY ("vehiculo_id") REFERENCES "vehiculo" ("id") DEFERRABLE INITIALLY IMMEDIATE;
+CREATE TABLE "payment" (
+                           "id" int PRIMARY KEY,
+                           "entry_record_id" int UNIQUE,
+                           "subtotal" decimal,
+                           "discount_percentage" decimal,
+                           "discount_amount" decimal,
+                           "total_paid" decimal,
+                           "payment_method" varchar,
+                           "payment_date" timestamp,
+                           "external_invoice_ref" varchar
+);
 
-ALTER TABLE "registro" ADD FOREIGN KEY ("celda_id") REFERENCES "celda" ("id") DEFERRABLE INITIALLY IMMEDIATE;
+CREATE TABLE "invoice" (
+                           "id" int PRIMARY KEY,
+                           "payment_id" int UNIQUE,
+                           "invoice_number" varchar UNIQUE,
+                           "issued_at" timestamp
+);
 
-ALTER TABLE "factura" ADD FOREIGN KEY ("pago_id") REFERENCES "pago" ("id") DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE "user" ADD FOREIGN KEY ("role_id") REFERENCES "role" ("id") DEFERRABLE INITIALLY IMMEDIATE;
 
-ALTER TABLE "pago" ADD FOREIGN KEY ("ingreso_id") REFERENCES "registro" ("id") DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE "vehicle" ADD FOREIGN KEY ("vehicle_type_id") REFERENCES "vehicle_type" ("id") DEFERRABLE INITIALLY IMMEDIATE;
+
+ALTER TABLE "vehicle" ADD FOREIGN KEY ("owner_id") REFERENCES "user" ("id") DEFERRABLE INITIALLY IMMEDIATE;
+
+ALTER TABLE "cell" ADD FOREIGN KEY ("parking_lot_id") REFERENCES "parking_lot" ("id") DEFERRABLE INITIALLY IMMEDIATE;
+
+ALTER TABLE "cell" ADD FOREIGN KEY ("vehicle_type_id") REFERENCES "vehicle_type" ("id") DEFERRABLE INITIALLY IMMEDIATE;
+
+ALTER TABLE "rate" ADD FOREIGN KEY ("parking_lot_id") REFERENCES "parking_lot" ("id") DEFERRABLE INITIALLY IMMEDIATE;
+
+ALTER TABLE "rate" ADD FOREIGN KEY ("vehicle_type_id") REFERENCES "vehicle_type" ("id") DEFERRABLE INITIALLY IMMEDIATE;
+
+ALTER TABLE "discount_config" ADD FOREIGN KEY ("parking_lot_id") REFERENCES "parking_lot" ("id") DEFERRABLE INITIALLY IMMEDIATE;
+
+ALTER TABLE "entry_record" ADD FOREIGN KEY ("vehicle_id") REFERENCES "vehicle" ("id") DEFERRABLE INITIALLY IMMEDIATE;
+
+ALTER TABLE "entry_record" ADD FOREIGN KEY ("cell_id") REFERENCES "cell" ("id") DEFERRABLE INITIALLY IMMEDIATE;
+
+ALTER TABLE "payment" ADD FOREIGN KEY ("entry_record_id") REFERENCES "entry_record" ("id") DEFERRABLE INITIALLY IMMEDIATE;
+
+ALTER TABLE "invoice" ADD FOREIGN KEY ("payment_id") REFERENCES "payment" ("id") DEFERRABLE INITIALLY IMMEDIATE;
