@@ -13,6 +13,8 @@ CREATE TABLE "usuario" (
                            "contrasena_hash" varchar NOT NULL,
                            "rol_id" int NOT NULL,
                            "activo" boolean,
+                           "intentos_fallidos" int,
+                           "bloqueado" boolean,
                            "fecha_registro" timestamp
 );
 
@@ -38,6 +40,8 @@ CREATE TABLE "parqueadero" (
                                "id" int PRIMARY KEY,
                                "nombre" varchar,
                                "direccion" varchar,
+                               "hora_apertura" timestamp,
+                               "hora_cierre" timestamp,
                                "filas" int,
                                "columnas" int,
                                "asignacion_automatica" boolean,
@@ -49,6 +53,7 @@ CREATE TABLE "celda" (
                          "parqueadero_id" int NOT NULL,
                          "fila" int,
                          "columna" int,
+                         "nombre" varchar,
                          "tipo_celda" varchar,
                          "estado" varchar,
                          "tipo_vehiculo_id" int,
@@ -77,14 +82,14 @@ CREATE TABLE "configuracion_descuento" (
                                            "fecha_fin" timestamp
 );
 
-CREATE TABLE "ingreso" (
-                           "id" int PRIMARY KEY,
-                           "vehiculo_id" int NOT NULL,
-                           "celda_id" int NOT NULL,
-                           "fecha_hora_ingreso" timestamp,
-                           "fecha_hora_salida" timestamp,
-                           "tiempo_permanencia_min" int,
-                           "estado" varchar
+CREATE TABLE "registro" (
+                            "id" int PRIMARY KEY,
+                            "vehiculo_id" int NOT NULL,
+                            "celda_id" int NOT NULL,
+                            "fecha_hora_ingreso" timestamp,
+                            "fecha_hora_salida" timestamp,
+                            "tiempo_permanencia_min" int,
+                            "estado" varchar
 );
 
 CREATE TABLE "factura" (
@@ -102,7 +107,8 @@ CREATE TABLE "pago" (
                         "valor_descuento" decimal,
                         "total_pagado" decimal,
                         "metodo_pago" varchar,
-                        "fecha_pago" timestamp
+                        "fecha_pago" timestamp,
+                        "factura_externa_ref" varchar
 );
 
 ALTER TABLE "usuario" ADD FOREIGN KEY ("rol_id") REFERENCES "rol" ("id") DEFERRABLE INITIALLY IMMEDIATE;
@@ -121,10 +127,10 @@ ALTER TABLE "tarifa" ADD FOREIGN KEY ("tipo_vehiculo_id") REFERENCES "tipo_vehic
 
 ALTER TABLE "configuracion_descuento" ADD FOREIGN KEY ("parqueadero_id") REFERENCES "parqueadero" ("id") DEFERRABLE INITIALLY IMMEDIATE;
 
-ALTER TABLE "ingreso" ADD FOREIGN KEY ("vehiculo_id") REFERENCES "vehiculo" ("id") DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE "registro" ADD FOREIGN KEY ("vehiculo_id") REFERENCES "vehiculo" ("id") DEFERRABLE INITIALLY IMMEDIATE;
 
-ALTER TABLE "ingreso" ADD FOREIGN KEY ("celda_id") REFERENCES "celda" ("id") DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE "registro" ADD FOREIGN KEY ("celda_id") REFERENCES "celda" ("id") DEFERRABLE INITIALLY IMMEDIATE;
 
 ALTER TABLE "factura" ADD FOREIGN KEY ("pago_id") REFERENCES "pago" ("id") DEFERRABLE INITIALLY IMMEDIATE;
 
-ALTER TABLE "pago" ADD FOREIGN KEY ("ingreso_id") REFERENCES "ingreso" ("id") DEFERRABLE INITIALLY IMMEDIATE;
+ALTER TABLE "pago" ADD FOREIGN KEY ("ingreso_id") REFERENCES "registro" ("id") DEFERRABLE INITIALLY IMMEDIATE;
