@@ -11,7 +11,7 @@ public class Vehicle {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "vehicle_type_id")
+    @JoinColumn(name = "vehicle_type_id", nullable = false)
     private VehicleType vehicleType;
 
     @Column(unique = true)
