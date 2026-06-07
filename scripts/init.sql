@@ -1,44 +1,11 @@
 CREATE TABLE "role" (
-                        "id" int PRIMARY KEY,
+                        "id" bigint PRIMARY KEY,
                         "name" varchar UNIQUE,
                         "description" varchar
 );
 
-CREATE TABLE "user" (
-                        "id" int PRIMARY KEY,
-                        "document" varchar UNIQUE NOT NULL,
-                        "name" varchar NOT NULL,
-                        "phone" varchar,
-                        "username" varchar UNIQUE,
-                        "password_hash" varchar NOT NULL,
-                        "role_id" int NOT NULL,
-                        "active" boolean,
-                        "failed_attempts" int,
-                        "blocked" boolean,
-                        "parking_lot_id" int,
-                        "created_at" timestamp
-);
-
-CREATE TABLE "vehicle_type" (
-                                "id" int PRIMARY KEY,
-                                "name" varchar UNIQUE,
-                                "requires_plate" boolean
-);
-
-CREATE TABLE "vehicle" (
-                           "id" int PRIMARY KEY,
-                           "vehicle_type_id" int NOT NULL,
-                           "plate" varchar UNIQUE,
-                           "bike_registration" varchar UNIQUE,
-                           "owner_id" int,
-                           "brand" varchar,
-                           "model" varchar,
-                           "color" varchar,
-                           "active" boolean
-);
-
 CREATE TABLE "parking_lot" (
-                               "id" int PRIMARY KEY,
+                               "id" bigint PRIMARY KEY,
                                "name" varchar,
                                "address" varchar,
                                "opening_time" time,
@@ -49,22 +16,56 @@ CREATE TABLE "parking_lot" (
                                "discounts_enabled" boolean
 );
 
+CREATE TABLE "user" (
+                        "id" bigint PRIMARY KEY,
+                        "document" varchar UNIQUE NOT NULL,
+                        "name" varchar NOT NULL,
+                        "phone" varchar,
+                        "username" varchar UNIQUE,
+                        "password_hash" varchar NOT NULL,
+                        "role_id" bigint NOT NULL,
+                        "active" boolean,
+                        "failed_attempts" int,
+                        "blocked" boolean,
+                        "parking_lot_id" bigint,
+                        "created_at" timestamp
+);
+
+CREATE TABLE "vehicle_type" (
+                                "id" bigint PRIMARY KEY,
+                                "name" varchar UNIQUE,
+                                "requires_plate" boolean
+);
+
+CREATE TABLE "vehicle" (
+                           "id" bigint PRIMARY KEY,
+                           "vehicle_type_id" bigint NOT NULL,
+                           "plate" varchar UNIQUE,
+                           "bike_registration" varchar UNIQUE,
+                           "owner_id" bigint,
+                           "brand" varchar,
+                           "model" varchar,
+                           "color" varchar,
+                           "active" boolean
+);
+
+
 CREATE TABLE "cell" (
-                        "id" int PRIMARY KEY,
-                        "parking_lot_id" int NOT NULL,
+                        "id" bigint PRIMARY KEY,
+                        "parking_lot_id" bigint NOT NULL,
                         "row" int,
                         "col" int,
                         "code" varchar,
                         "cell_type" varchar,
                         "status" varchar,
-                        "vehicle_type_id" int,
+                        "vehicle_type_id" bigint,
                         "reserved_for_staff" boolean
 );
 
 CREATE TABLE "rate" (
-                        "id" int PRIMARY KEY,
-                        "parking_lot_id" int NOT NULL,
-                        "vehicle_type_id" int NOT NULL,
+                        "id" bigint PRIMARY KEY,
+                        "parking_lot_id" bigint NOT NULL,
+                        "vehicle_type_id" bigint NOT NULL,
                         "rate_type" varchar,
                         "cost" decimal,
                         "start_date" timestamp,
@@ -73,8 +74,8 @@ CREATE TABLE "rate" (
 );
 
 CREATE TABLE "discount_config" (
-                                   "id" int PRIMARY KEY,
-                                   "parking_lot_id" int NOT NULL,
+                                   "id" bigint PRIMARY KEY,
+                                   "parking_lot_id" bigint NOT NULL,
                                    "active" boolean,
                                    "min_external_invoice" decimal,
                                    "min_visits" int,
@@ -84,10 +85,10 @@ CREATE TABLE "discount_config" (
 );
 
 CREATE TABLE "entry_record" (
-                                "id" int PRIMARY KEY,
-                                "vehicle_id" int NOT NULL,
-                                "cell_id" int NOT NULL,
-                                "recorded_by" int,
+                                "id" bigint PRIMARY KEY,
+                                "vehicle_id" bigint NOT NULL,
+                                "cell_id" bigint NOT NULL,
+                                "recorded_by" bigint,
                                 "entry_time" timestamp,
                                 "exit_time" timestamp,
                                 "duration" int,
@@ -95,8 +96,8 @@ CREATE TABLE "entry_record" (
 );
 
 CREATE TABLE "payment" (
-                           "id" int PRIMARY KEY,
-                           "entry_record_id" int UNIQUE,
+                           "id" bigint PRIMARY KEY,
+                           "entry_record_id" bigint UNIQUE,
                            "subtotal" decimal,
                            "discount_percentage" decimal,
                            "discount_amount" decimal,
@@ -107,8 +108,8 @@ CREATE TABLE "payment" (
 );
 
 CREATE TABLE "invoice" (
-                           "id" int PRIMARY KEY,
-                           "payment_id" int UNIQUE,
+                           "id" bigint PRIMARY KEY,
+                           "payment_id" bigint UNIQUE,
                            "invoice_number" varchar UNIQUE,
                            "issued_at" timestamp
 );
