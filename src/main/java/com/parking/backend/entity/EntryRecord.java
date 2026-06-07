@@ -19,6 +19,10 @@ public class EntryRecord {
     @JoinColumn(name = "cell_id", nullable = false)
     private Cell cell;
 
+    @ManyToOne
+    @JoinColumn(name = "recorded_by")
+    private User recordedBy;
+
     // LocalDateTime: exact moment the vehicle entered
     @Column(name = "entry_time")
     private LocalDateTime entryTime;
@@ -42,6 +46,9 @@ public class EntryRecord {
 
     public Cell getCell() { return cell; }
     public void setCell(Cell cell) { this.cell = cell; }
+
+    public User getRecordedBy() { return recordedBy; }
+    public void setRecordedBy(User recordedBy) { this.recordedBy = recordedBy; }
 
     public LocalDateTime getEntryTime() { return entryTime; }
     public void setEntryTime(LocalDateTime entryTime) { this.entryTime = entryTime; }

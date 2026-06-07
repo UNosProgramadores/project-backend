@@ -15,6 +15,7 @@ CREATE TABLE "user" (
                         "active" boolean,
                         "failed_attempts" int,
                         "blocked" boolean,
+                        "parking_lot_id" int,
                         "created_at" timestamp
 );
 
@@ -26,7 +27,7 @@ CREATE TABLE "vehicle_type" (
 
 CREATE TABLE "vehicle" (
                            "id" int PRIMARY KEY,
-                           "vehicle_type_id" int,
+                           "vehicle_type_id" int NOT NULL,
                            "plate" varchar UNIQUE,
                            "bike_registration" varchar UNIQUE,
                            "owner_id" int,
@@ -63,7 +64,7 @@ CREATE TABLE "cell" (
 CREATE TABLE "rate" (
                         "id" int PRIMARY KEY,
                         "parking_lot_id" int NOT NULL,
-                        "vehicle_type_id" int,
+                        "vehicle_type_id" int NOT NULL,
                         "rate_type" varchar,
                         "cost" decimal,
                         "start_date" timestamp,
@@ -73,7 +74,7 @@ CREATE TABLE "rate" (
 
 CREATE TABLE "discount_config" (
                                    "id" int PRIMARY KEY,
-                                   "parking_lot_id" int,
+                                   "parking_lot_id" int NOT NULL,
                                    "active" boolean,
                                    "min_external_invoice" decimal,
                                    "min_visits" int,
@@ -86,6 +87,7 @@ CREATE TABLE "entry_record" (
                                 "id" int PRIMARY KEY,
                                 "vehicle_id" int NOT NULL,
                                 "cell_id" int NOT NULL,
+                                "recorded_by" int,
                                 "entry_time" timestamp,
                                 "exit_time" timestamp,
                                 "duration" int,
@@ -113,6 +115,8 @@ CREATE TABLE "invoice" (
 
 ALTER TABLE "user" ADD FOREIGN KEY ("role_id") REFERENCES "role" ("id") DEFERRABLE INITIALLY IMMEDIATE;
 
+ALTER TABLE "user" ADD FOREIGN KEY ("parking_lot_id") REFERENCES "parking_lot" ("id") DEFERRABLE INITIALLY IMMEDIATE;
+
 ALTER TABLE "vehicle" ADD FOREIGN KEY ("vehicle_type_id") REFERENCES "vehicle_type" ("id") DEFERRABLE INITIALLY IMMEDIATE;
 
 ALTER TABLE "vehicle" ADD FOREIGN KEY ("owner_id") REFERENCES "user" ("id") DEFERRABLE INITIALLY IMMEDIATE;
@@ -130,6 +134,8 @@ ALTER TABLE "discount_config" ADD FOREIGN KEY ("parking_lot_id") REFERENCES "par
 ALTER TABLE "entry_record" ADD FOREIGN KEY ("vehicle_id") REFERENCES "vehicle" ("id") DEFERRABLE INITIALLY IMMEDIATE;
 
 ALTER TABLE "entry_record" ADD FOREIGN KEY ("cell_id") REFERENCES "cell" ("id") DEFERRABLE INITIALLY IMMEDIATE;
+
+ALTER TABLE "entry_record" ADD FOREIGN KEY ("recorded_by") REFERENCES "user" ("id") DEFERRABLE INITIALLY IMMEDIATE;
 
 ALTER TABLE "payment" ADD FOREIGN KEY ("entry_record_id") REFERENCES "entry_record" ("id") DEFERRABLE INITIALLY IMMEDIATE;
 

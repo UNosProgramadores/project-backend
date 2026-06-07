@@ -17,7 +17,7 @@ public class Rate {
     private ParkingLot parkingLot;
 
     @ManyToOne
-    @JoinColumn(name = "vehicle_type_id")
+    @JoinColumn(name = "vehicle_type_id", nullable = false)
     private VehicleType vehicleType;
 
     // "per_minute" or "flat"

@@ -38,6 +38,10 @@ public class User {
 
     private Boolean blocked = false;
 
+    @ManyToOne
+    @JoinColumn(name = "parking_lot_id")
+    private ParkingLot parkingLot;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -70,6 +74,9 @@ public class User {
 
     public Boolean getBlocked() { return blocked; }
     public void setBlocked(Boolean blocked) { this.blocked = blocked; }
+
+    public ParkingLot getParkingLot() { return parkingLot; }
+    public void setParkingLot(ParkingLot parkingLot) { this.parkingLot = parkingLot; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }

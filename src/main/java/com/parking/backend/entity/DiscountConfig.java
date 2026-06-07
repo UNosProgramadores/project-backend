@@ -13,7 +13,7 @@ public class DiscountConfig {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "parking_lot_id")
+    @JoinColumn(name = "parking_lot_id", nullable = false)
     private ParkingLot parkingLot;
 
     private Boolean active;
