@@ -34,22 +34,22 @@ INSERT INTO parking_lot (id, name, address, opening_time, closing_time, rows, co
 -- USER
 -- ============================================================
 -- Passwords (SHA-256):
---   admin123  → a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3
---   staff456  → 4b5f29b8c4aa63e5dcf3bfa72d65bfb9c9f8a3d1e2c7b4a1f0e9d8c7b6a5f4e3
---   client789 → 9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08
+--   admin123  → 240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9
+--   staff456  → 8f5dada329d6ade1fdba5e207b5a81b312ae838801ca287a00e9428620808dce
+--   client789 → 26059b6231aeaca864b1376dc03f48aaf490ad7a5a2c400bb1ca32ddf5f8209b
 
 INSERT INTO "user" (id, document, name, phone, username, password_hash, role_id, parking_lot_id, active, failed_attempts, blocked, created_at) VALUES
 -- Admins: each owns one parking lot
-(1, '10000001', 'Carlos Mendoza', '3101234567', 'cmendoza',  'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3', 1, 1,    true,  0, false, '2024-01-15 08:00:00'),
-(2, '10000002', 'Rosa Perez',     '3209111222', 'rperez',    'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3', 1, 2,    true,  0, false, '2024-01-16 09:00:00'),
+(1, '10000001', 'Carlos Mendoza', '3101234567', 'cmendoza',  '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', 1, 1,    true,  0, false, '2024-01-15 08:00:00'),
+(2, '10000002', 'Rosa Perez',     '3209111222', 'rperez',    '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9', 1, 2,    true,  0, false, '2024-01-16 09:00:00'),
 -- Staff: each works at one parking lot
-(3, '10000003', 'Laura Gomez',    '3209876543', 'lgomez',    '4b5f29b8c4aa63e5dcf3bfa72d65bfb9c9f8a3d1e2c7b4a1f0e9d8c7b6a5f4e3', 2, 1,    true,  0, false, '2024-01-17 09:00:00'),
-(4, '10000004', 'Pedro Ramirez',  '3154445566', 'pramirez',  '4b5f29b8c4aa63e5dcf3bfa72d65bfb9c9f8a3d1e2c7b4a1f0e9d8c7b6a5f4e3', 2, 2,    true,  0, false, '2024-01-18 09:30:00'),
+(3, '10000003', 'Laura Gomez',    '3209876543', 'lgomez',    '8f5dada329d6ade1fdba5e207b5a81b312ae838801ca287a00e9428620808dce', 2, 1,    true,  0, false, '2024-01-17 09:00:00'),
+(4, '10000004', 'Pedro Ramirez',  '3154445566', 'pramirez',  '8f5dada329d6ade1fdba5e207b5a81b312ae838801ca287a00e9428620808dce', 2, 2,    true,  0, false, '2024-01-18 09:30:00'),
 -- Customers: no parking lot assigned (null) — can visit any lot
-(5, '10000005', 'Ana Torres',     '3001112233', 'atorres',   '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08', 3, NULL, true,  0, false, '2024-02-01 10:00:00'),
-(6, '10000006', 'Luis Herrera',   '3177778899', 'lherrera',  '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08', 3, NULL, true,  0, false, '2024-02-05 11:00:00'),
-(7, '10000007', 'Sofia Vargas',   '3123334455', 'svargas',   '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08', 3, NULL, true,  3, false, '2024-02-10 12:00:00'),
-(8, '10000008', 'Mateo Castillo', '3056667788', 'mcastillo', '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08', 3, NULL, false, 5, true,  '2024-02-12 08:00:00');
+(5, '10000005', 'Ana Torres',     '3001112233', 'atorres',   '26059b6231aeaca864b1376dc03f48aaf490ad7a5a2c400bb1ca32ddf5f8209b', 3, NULL, true,  0, false, '2024-02-01 10:00:00'),
+(6, '10000006', 'Luis Herrera',   '3177778899', 'lherrera',  '26059b6231aeaca864b1376dc03f48aaf490ad7a5a2c400bb1ca32ddf5f8209b', 3, NULL, true,  0, false, '2024-02-05 11:00:00'),
+(7, '10000007', 'Sofia Vargas',   '3123334455', 'svargas',   '26059b6231aeaca864b1376dc03f48aaf490ad7a5a2c400bb1ca32ddf5f8209b', 3, NULL, true,  3, false, '2024-02-10 12:00:00'),
+(8, '10000008', 'Mateo Castillo', '3056667788', 'mcastillo', '26059b6231aeaca864b1376dc03f48aaf490ad7a5a2c400bb1ca32ddf5f8209b', 3, NULL, false, 5, true,  '2024-02-12 08:00:00');
 -- user 7: 3 failed attempts, not yet blocked (tests partial lockout)
 -- user 8: 5 failed attempts, blocked (tests RNF_03)
 
@@ -165,3 +165,40 @@ INSERT INTO invoice (id, payment_id, invoice_number, issued_at) VALUES
                                                                     (2, 2, 'INV-2024-0002', '2024-05-10 09:45:00'),
                                                                     (3, 3, 'INV-2024-0003', '2024-05-11 08:30:00'),
                                                                     (4, 4, 'INV-2024-0004', '2024-05-12 17:30:00');
+
+-- ============================================================
+-- RESET IDENTITY SEQUENCES
+-- Prevent duplicate key errors after loading demo data
+-- ============================================================
+SELECT setval(pg_get_serial_sequence('role', 'id'),
+              (SELECT MAX(id) FROM role));
+
+SELECT setval(pg_get_serial_sequence('vehicle_type', 'id'),
+              (SELECT MAX(id) FROM vehicle_type));
+
+SELECT setval(pg_get_serial_sequence('parking_lot', 'id'),
+              (SELECT MAX(id) FROM parking_lot));
+
+SELECT setval(pg_get_serial_sequence('"user"', 'id'),
+              (SELECT MAX(id) FROM "user"));
+
+SELECT setval(pg_get_serial_sequence('vehicle', 'id'),
+              (SELECT MAX(id) FROM vehicle));
+
+SELECT setval(pg_get_serial_sequence('cell', 'id'),
+              (SELECT MAX(id) FROM cell));
+
+SELECT setval(pg_get_serial_sequence('rate', 'id'),
+              (SELECT MAX(id) FROM rate));
+
+SELECT setval(pg_get_serial_sequence('discount_config', 'id'),
+              (SELECT MAX(id) FROM discount_config));
+
+SELECT setval(pg_get_serial_sequence('entry_record', 'id'),
+              (SELECT MAX(id) FROM entry_record));
+
+SELECT setval(pg_get_serial_sequence('payment', 'id'),
+              (SELECT MAX(id) FROM payment));
+
+SELECT setval(pg_get_serial_sequence('invoice', 'id'),
+              (SELECT MAX(id) FROM invoice));
