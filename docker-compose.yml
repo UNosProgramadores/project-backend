@@ -1,6 +1,6 @@
 services:
   db:
-    container_name: parking_postgres_db
+    container_name: ${DB_CONTAINER}
     image: postgres:16
     ports:
       - "${DB_PORT}:5432"
