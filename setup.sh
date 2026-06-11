@@ -44,7 +44,7 @@ DB_PASSWORD=$DB_PASSWORD
 
 echo ""
 echo "[3/6] Levantando base de datos..."
-docker compose up -d
+sudo docker compose up -d
 
 echo "Esperando a que PostgreSQL inicie..."
 sleep 10
@@ -53,12 +53,12 @@ echo ""
 echo "[4/6] Ejecutando scripts SQL..."
 
 if [ -f "scripts/init.sql" ]; then
-    docker exec -i $DB_CONTAINER psql -U "$DB_USER" -d "$DB_NAME" < scripts/init.sql
+    sudo docker exec -i $DB_CONTAINER psql -U "$DB_USER" -d "$DB_NAME" < scripts/init.sql
     echo "init.sql ejecutado."
 fi
 
 if [ -f "scripts/data_demo.sql" ]; then
-    docker exec -i $DB_CONTAINER psql -U "$DB_USER" -d "$DB_NAME" < scripts/data_demo.sql
+    sudo docker exec -i $DB_CONTAINER psql -U "$DB_USER" -d "$DB_NAME" < scripts/data_demo.sql
     echo "data_demo.sql ejecutado."
 fi
 
