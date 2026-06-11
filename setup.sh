@@ -6,8 +6,6 @@ echo "=========================================="
 echo "   Configuración inicial proyecto PARKING"
 echo "=========================================="
 
-DB_CONTAINER="parking-db-container"
-
 echo ""
 echo "[1/6] Verificando dependencias..."
 
