@@ -3,6 +3,7 @@ package com.parking.backend.config;
 import com.parking.backend.security.JwtAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -32,8 +33,6 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
 
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/parking-lots").permitAll()
-                        .requestMatchers("/api/parking-lots/*/map").permitAll()
 
                         .requestMatchers("/api/parking-lots/*/config").hasRole("ADMIN")
                         .requestMatchers("/api/parking-lots/*/staff/**").hasRole("ADMIN")
@@ -45,6 +44,11 @@ public class SecurityConfig {
                         .requestMatchers("/api/parking-lots/*/active-entries").hasAnyRole("ADMIN", "STAFF")
                         .requestMatchers("/api/parking-lots/*/payments/**").hasAnyRole("ADMIN", "STAFF")
                         .requestMatchers("/api/parking-lots/*/reports/**").hasAnyRole("ADMIN", "STAFF")
+
+                        .requestMatchers(HttpMethod.GET, "/api/parking-lots/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/parking-lots/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/api/parking-lots/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/parking-lots/**").hasRole("ADMIN")
 
                         .anyRequest().authenticated()
                 )
