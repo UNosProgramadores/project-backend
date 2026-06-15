@@ -22,15 +22,31 @@ public class Invoice {
     @Column(name = "issued_at")
     private LocalDateTime issuedAt;
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public Payment getPayment() { return payment; }
-    public void setPayment(Payment payment) { this.payment = payment; }
+    public Payment getPayment() {
+        return payment;
+    }
+    public void setPayment(Payment payment) {
+        this.payment = payment;
+    }
 
-    public String getInvoiceNumber() { return invoiceNumber; }
-    public void setInvoiceNumber(String invoiceNumber) { this.invoiceNumber = invoiceNumber; }
+    public String getInvoiceNumber() {
+        return invoiceNumber;
+    }
+    public void setInvoiceNumber(String invoiceNumber) {
+        this.invoiceNumber = invoiceNumber;
+    }
 
-    public LocalDateTime getIssuedAt() { return issuedAt; }
-    public void setIssuedAt(LocalDateTime issuedAt) { this.issuedAt = issuedAt; }
+    public LocalDateTime getIssuedAt() {
+        return issuedAt;
+    }
+    public void setIssuedAt(LocalDateTime issuedAt) {
+        this.issuedAt = issuedAt;
+    }
 }

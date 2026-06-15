@@ -30,30 +30,66 @@ public class ParkingLot {
     @Column(name = "discounts_enabled")
     private Boolean discountsEnabled;
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    public String getAddress() { return address; }
-    public void setAddress(String address) { this.address = address; }
+    public String getAddress() {
+        return address;
+    }
+    public void setAddress(String address) {
+        this.address = address;
+    }
 
-    public LocalTime getOpeningTime() { return openingTime; }
-    public void setOpeningTime(LocalTime openingTime) { this.openingTime = openingTime; }
+    public LocalTime getOpeningTime() {
+        return openingTime;
+    }
+    public void setOpeningTime(LocalTime openingTime) {
+        this.openingTime = openingTime;
+    }
 
-    public LocalTime getClosingTime() { return closingTime; }
-    public void setClosingTime(LocalTime closingTime) { this.closingTime = closingTime; }
+    public LocalTime getClosingTime() {
+        return closingTime;
+    }
+    public void setClosingTime(LocalTime closingTime) {
+        this.closingTime = closingTime;
+    }
 
-    public Integer getRows() { return rows; }
-    public void setRows(Integer rows) { this.rows = rows; }
+    public Integer getRows() {
+        return rows;
+    }
+    public void setRows(Integer rows) {
+        this.rows = rows;
+    }
 
-    public Integer getColumns() { return columns; }
-    public void setColumns(Integer columns) { this.columns = columns; }
+    public Integer getColumns() {
+        return columns;
+    }
+    public void setColumns(Integer columns) {
+        this.columns = columns;
+    }
 
-    public Boolean getAutoAssignment() { return autoAssignment; }
-    public void setAutoAssignment(Boolean autoAssignment) { this.autoAssignment = autoAssignment; }
+    public Boolean getAutoAssignment() {
+        return autoAssignment;
+    }
+    public void setAutoAssignment(Boolean autoAssignment) {
+        this.autoAssignment = autoAssignment;
+    }
 
-    public Boolean getDiscountsEnabled() { return discountsEnabled; }
-    public void setDiscountsEnabled(Boolean discountsEnabled) { this.discountsEnabled = discountsEnabled; }
+    public Boolean getDiscountsEnabled() {
+        return discountsEnabled;
+    }
+    public void setDiscountsEnabled(Boolean discountsEnabled) {
+        this.discountsEnabled = discountsEnabled;
+    }
 }

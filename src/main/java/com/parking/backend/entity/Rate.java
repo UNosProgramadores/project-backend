@@ -36,27 +36,59 @@ public class Rate {
 
     private Boolean active;
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public ParkingLot getParkingLot() { return parkingLot; }
-    public void setParkingLot(ParkingLot parkingLot) { this.parkingLot = parkingLot; }
+    public ParkingLot getParkingLot() {
+        return parkingLot;
+    }
+    public void setParkingLot(ParkingLot parkingLot) {
+        this.parkingLot = parkingLot;
+    }
 
-    public VehicleType getVehicleType() { return vehicleType; }
-    public void setVehicleType(VehicleType vehicleType) { this.vehicleType = vehicleType; }
+    public VehicleType getVehicleType() {
+        return vehicleType;
+    }
+    public void setVehicleType(VehicleType vehicleType) {
+        this.vehicleType = vehicleType;
+    }
 
-    public String getRateType() { return rateType; }
-    public void setRateType(String rateType) { this.rateType = rateType; }
+    public String getRateType() {
+        return rateType;
+    }
+    public void setRateType(String rateType) {
+        this.rateType = rateType;
+    }
 
-    public BigDecimal getCost() { return cost; }
-    public void setCost(BigDecimal cost) { this.cost = cost; }
+    public BigDecimal getCost() {
+        return cost;
+    }
+    public void setCost(BigDecimal cost) {
+        this.cost = cost;
+    }
 
-    public LocalDateTime getStartDate() { return startDate; }
-    public void setStartDate(LocalDateTime startDate) { this.startDate = startDate; }
+    public LocalDateTime getStartDate() {
+        return startDate;
+    }
+    public void setStartDate(LocalDateTime startDate) {
+        this.startDate = startDate;
+    }
 
-    public LocalDateTime getEndDate() { return endDate; }
-    public void setEndDate(LocalDateTime endDate) { this.endDate = endDate; }
+    public LocalDateTime getEndDate() {
+        return endDate;
+    }
+    public void setEndDate(LocalDateTime endDate) {
+        this.endDate = endDate;
+    }
 
-    public Boolean getActive() { return active; }
-    public void setActive(Boolean active) { this.active = active; }
+    public Boolean getActive() {
+        return active;
+    }
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
 }

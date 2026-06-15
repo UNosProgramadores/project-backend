@@ -38,27 +38,59 @@ public class EntryRecord {
     // "active" or "completed"
     private String status;
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public Vehicle getVehicle() { return vehicle; }
-    public void setVehicle(Vehicle vehicle) { this.vehicle = vehicle; }
+    public Vehicle getVehicle() {
+        return vehicle;
+    }
+    public void setVehicle(Vehicle vehicle) {
+        this.vehicle = vehicle;
+    }
 
-    public Cell getCell() { return cell; }
-    public void setCell(Cell cell) { this.cell = cell; }
+    public Cell getCell() {
+        return cell;
+    }
+    public void setCell(Cell cell) {
+        this.cell = cell;
+    }
 
-    public User getRecordedBy() { return recordedBy; }
-    public void setRecordedBy(User recordedBy) { this.recordedBy = recordedBy; }
+    public User getRecordedBy() {
+        return recordedBy;
+    }
+    public void setRecordedBy(User recordedBy) {
+        this.recordedBy = recordedBy;
+    }
 
-    public LocalDateTime getEntryTime() { return entryTime; }
-    public void setEntryTime(LocalDateTime entryTime) { this.entryTime = entryTime; }
+    public LocalDateTime getEntryTime() {
+        return entryTime;
+    }
+    public void setEntryTime(LocalDateTime entryTime) {
+        this.entryTime = entryTime;
+    }
 
-    public LocalDateTime getExitTime() { return exitTime; }
-    public void setExitTime(LocalDateTime exitTime) { this.exitTime = exitTime; }
+    public LocalDateTime getExitTime() {
+        return exitTime;
+    }
+    public void setExitTime(LocalDateTime exitTime) {
+        this.exitTime = exitTime;
+    }
 
-    public Integer getDuration() { return duration; }
-    public void setDuration(Integer duration) { this.duration = duration; }
+    public Integer getDuration() {
+        return duration;
+    }
+    public void setDuration(Integer duration) {
+        this.duration = duration;
+    }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public String getStatus() {
+        return status;
+    }
+    public void setStatus(String status) {
+        this.status = status;
+    }
 }

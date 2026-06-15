@@ -16,12 +16,24 @@ public class VehicleType {
     @Column(name = "requires_plate")
     private Boolean requiresPlate;
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    public Boolean getRequiresPlate() { return requiresPlate; }
-    public void setRequiresPlate(Boolean requiresPlate) { this.requiresPlate = requiresPlate; }
+    public Boolean getRequiresPlate() {
+        return requiresPlate;
+    }
+    public void setRequiresPlate(Boolean requiresPlate) {
+        this.requiresPlate = requiresPlate;
+    }
 }

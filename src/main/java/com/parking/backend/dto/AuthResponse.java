@@ -16,9 +16,19 @@ public class AuthResponse {
         this.parkingLotId = parkingLotId;
     }
 
-    public String getToken() { return token; }
-    public String getRole() { return role; }
-    public Long getUserId() { return userId; }
-    public String getName() { return name; }
-    public Long getParkingLotId() { return parkingLotId; }
+    public String getToken() {
+        return token;
+    }
+    public String getRole() {
+        return role;
+    }
+    public Long getUserId() {
+        return userId;
+    }
+    public String getName() {
+        return name;
+    }
+    public Long getParkingLotId() {
+        return parkingLotId;
+    }
 }

@@ -29,20 +29,20 @@ public class ParkingLotService {
     @Transactional
     public ParkingLot create(ParkingLotRequest request) {
         validateHours(request);
-        
+
         ParkingLot parkingLot = new ParkingLot();
         updateEntityFromRequest(parkingLot, request);
-        
+
         return parkingLotRepository.save(parkingLot);
     }
 
     @Transactional
     public ParkingLot update(Long id, ParkingLotRequest request) {
         validateHours(request);
-        
+
         ParkingLot parkingLot = getById(id);
         updateEntityFromRequest(parkingLot, request);
-        
+
         return parkingLotRepository.save(parkingLot);
     }
 

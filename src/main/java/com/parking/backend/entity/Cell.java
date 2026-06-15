@@ -37,30 +37,66 @@ public class Cell {
     @Column(name = "reserved_for_staff")
     private Boolean reservedForStaff;
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public ParkingLot getParkingLot() { return parkingLot; }
-    public void setParkingLot(ParkingLot parkingLot) { this.parkingLot = parkingLot; }
+    public ParkingLot getParkingLot() {
+        return parkingLot;
+    }
+    public void setParkingLot(ParkingLot parkingLot) {
+        this.parkingLot = parkingLot;
+    }
 
-    public Integer getRow() { return row; }
-    public void setRow(Integer row) { this.row = row; }
+    public Integer getRow() {
+        return row;
+    }
+    public void setRow(Integer row) {
+        this.row = row;
+    }
 
-    public Integer getCol() { return col; }
-    public void setCol(Integer col) { this.col = col; }
+    public Integer getCol() {
+        return col;
+    }
+    public void setCol(Integer col) {
+        this.col = col;
+    }
 
-    public String getCode() { return code; }
-    public void setCode(String code) { this.code = code; }
+    public String getCode() {
+        return code;
+    }
+    public void setCode(String code) {
+        this.code = code;
+    }
 
-    public String getCellType() { return cellType; }
-    public void setCellType(String cellType) { this.cellType = cellType; }
+    public String getCellType() {
+        return cellType;
+    }
+    public void setCellType(String cellType) {
+        this.cellType = cellType;
+    }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public String getStatus() {
+        return status;
+    }
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
-    public VehicleType getVehicleType() { return vehicleType; }
-    public void setVehicleType(VehicleType vehicleType) { this.vehicleType = vehicleType; }
+    public VehicleType getVehicleType() {
+        return vehicleType;
+    }
+    public void setVehicleType(VehicleType vehicleType) {
+        this.vehicleType = vehicleType;
+    }
 
-    public Boolean getReservedForStaff() { return reservedForStaff; }
-    public void setReservedForStaff(Boolean reservedForStaff) { this.reservedForStaff = reservedForStaff; }
+    public Boolean getReservedForStaff() {
+        return reservedForStaff;
+    }
+    public void setReservedForStaff(Boolean reservedForStaff) {
+        this.reservedForStaff = reservedForStaff;
+    }
 }
