@@ -3,7 +3,8 @@ package com.parking.backend.dto;
 public class VehicleEntryRequest {
 
     private Long parkingLotId;
-    private String identifier;
+    private String plate;
+    private String bikeRegistration;
 
     public Long getParkingLotId() {
         return parkingLotId;
@@ -13,11 +14,19 @@ public class VehicleEntryRequest {
         this.parkingLotId = parkingLotId;
     }
 
-    public String getIdentifier() {
-        return identifier;
+    public String getPlate() {
+        return plate;
     }
 
-    public void setIdentifier(String identifier) {
-        this.identifier = identifier;
+    public void setPlate(String plate) {
+        this.plate = plate;
+    }
+
+    public String getBikeRegistration() {
+        return bikeRegistration;
+    }
+
+    public void setBikeRegistration(String bikeRegistration) {
+        this.bikeRegistration = bikeRegistration;
     }
 }
