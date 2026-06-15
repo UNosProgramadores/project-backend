@@ -23,6 +23,18 @@ import java.time.LocalDateTime;
     private final CellRepository cellRepository;
     private final RateRepository rateRepository;
 
+    public EntryRecordService(ParkingLotRepository parkingLotRepository,
+                              EntryRecordRepository entryRecordRepository,
+                              VehicleRepository vehicleRepository,
+                              CellRepository cellRepository,
+                              RateRepository rateRepository) {
+        this.parkingLotRepository = parkingLotRepository;
+        this.entryRecordRepository = entryRecordRepository;
+        this.vehicleRepository = vehicleRepository;
+        this.cellRepository = cellRepository;
+        this.rateRepository = rateRepository;
+    }
+
     public EntryRecord registerEntry(VehicleEntryRequest request) {
 
         ParkingLot parkingLot = parkingLotRepository.findById(
