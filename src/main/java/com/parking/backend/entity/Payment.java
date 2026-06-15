@@ -39,30 +39,66 @@ public class Payment {
     @Column(name = "external_invoice_ref")
     private String externalInvoiceRef;
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public EntryRecord getEntryRecord() { return entryRecord; }
-    public void setEntryRecord(EntryRecord entryRecord) { this.entryRecord = entryRecord; }
+    public EntryRecord getEntryRecord() {
+        return entryRecord;
+    }
+    public void setEntryRecord(EntryRecord entryRecord) {
+        this.entryRecord = entryRecord;
+    }
 
-    public BigDecimal getSubtotal() { return subtotal; }
-    public void setSubtotal(BigDecimal subtotal) { this.subtotal = subtotal; }
+    public BigDecimal getSubtotal() {
+        return subtotal;
+    }
+    public void setSubtotal(BigDecimal subtotal) {
+        this.subtotal = subtotal;
+    }
 
-    public BigDecimal getDiscountPercentage() { return discountPercentage; }
-    public void setDiscountPercentage(BigDecimal discountPercentage) { this.discountPercentage = discountPercentage; }
+    public BigDecimal getDiscountPercentage() {
+        return discountPercentage;
+    }
+    public void setDiscountPercentage(BigDecimal discountPercentage) {
+        this.discountPercentage = discountPercentage;
+    }
 
-    public BigDecimal getDiscountAmount() { return discountAmount; }
-    public void setDiscountAmount(BigDecimal discountAmount) { this.discountAmount = discountAmount; }
+    public BigDecimal getDiscountAmount() {
+        return discountAmount;
+    }
+    public void setDiscountAmount(BigDecimal discountAmount) {
+        this.discountAmount = discountAmount;
+    }
 
-    public BigDecimal getTotalPaid() { return totalPaid; }
-    public void setTotalPaid(BigDecimal totalPaid) { this.totalPaid = totalPaid; }
+    public BigDecimal getTotalPaid() {
+        return totalPaid;
+    }
+    public void setTotalPaid(BigDecimal totalPaid) {
+        this.totalPaid = totalPaid;
+    }
 
-    public String getPaymentMethod() { return paymentMethod; }
-    public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
 
-    public LocalDateTime getPaymentDate() { return paymentDate; }
-    public void setPaymentDate(LocalDateTime paymentDate) { this.paymentDate = paymentDate; }
+    public LocalDateTime getPaymentDate() {
+        return paymentDate;
+    }
+    public void setPaymentDate(LocalDateTime paymentDate) {
+        this.paymentDate = paymentDate;
+    }
 
-    public String getExternalInvoiceRef() { return externalInvoiceRef; }
-    public void setExternalInvoiceRef(String externalInvoiceRef) { this.externalInvoiceRef = externalInvoiceRef; }
+    public String getExternalInvoiceRef() {
+        return externalInvoiceRef;
+    }
+    public void setExternalInvoiceRef(String externalInvoiceRef) {
+        this.externalInvoiceRef = externalInvoiceRef;
+    }
 }

@@ -36,27 +36,59 @@ public class DiscountConfig {
     @Column(name = "end_date")
     private LocalDateTime endDate;
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public ParkingLot getParkingLot() { return parkingLot; }
-    public void setParkingLot(ParkingLot parkingLot) { this.parkingLot = parkingLot; }
+    public ParkingLot getParkingLot() {
+        return parkingLot;
+    }
+    public void setParkingLot(ParkingLot parkingLot) {
+        this.parkingLot = parkingLot;
+    }
 
-    public Boolean getActive() { return active; }
-    public void setActive(Boolean active) { this.active = active; }
+    public Boolean getActive() {
+        return active;
+    }
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
 
-    public BigDecimal getMinExternalInvoice() { return minExternalInvoice; }
-    public void setMinExternalInvoice(BigDecimal minExternalInvoice) { this.minExternalInvoice = minExternalInvoice; }
+    public BigDecimal getMinExternalInvoice() {
+        return minExternalInvoice;
+    }
+    public void setMinExternalInvoice(BigDecimal minExternalInvoice) {
+        this.minExternalInvoice = minExternalInvoice;
+    }
 
-    public Integer getMinVisits() { return minVisits; }
-    public void setMinVisits(Integer minVisits) { this.minVisits = minVisits; }
+    public Integer getMinVisits() {
+        return minVisits;
+    }
+    public void setMinVisits(Integer minVisits) {
+        this.minVisits = minVisits;
+    }
 
-    public BigDecimal getDiscountPercentage() { return discountPercentage; }
-    public void setDiscountPercentage(BigDecimal discountPercentage) { this.discountPercentage = discountPercentage; }
+    public BigDecimal getDiscountPercentage() {
+        return discountPercentage;
+    }
+    public void setDiscountPercentage(BigDecimal discountPercentage) {
+        this.discountPercentage = discountPercentage;
+    }
 
-    public LocalDateTime getStartDate() { return startDate; }
-    public void setStartDate(LocalDateTime startDate) { this.startDate = startDate; }
+    public LocalDateTime getStartDate() {
+        return startDate;
+    }
+    public void setStartDate(LocalDateTime startDate) {
+        this.startDate = startDate;
+    }
 
-    public LocalDateTime getEndDate() { return endDate; }
-    public void setEndDate(LocalDateTime endDate) { this.endDate = endDate; }
+    public LocalDateTime getEndDate() {
+        return endDate;
+    }
+    public void setEndDate(LocalDateTime endDate) {
+        this.endDate = endDate;
+    }
 }

@@ -18,18 +18,38 @@ public class RegisterRequest {
     @NotBlank(message = "Password is required")
     private String password;
 
-    public String getDocument() { return document; }
-    public void setDocument(String document) { this.document = document; }
+    public String getDocument() {
+        return document;
+    }
+    public void setDocument(String document) {
+        this.document = document;
+    }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    public String getPhone() { return phone; }
-    public void setPhone(String phone) { this.phone = phone; }
+    public String getPhone() {
+        return phone;
+    }
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
 
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
+    public String getUsername() {
+        return username;
+    }
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
+    public String getPassword() {
+        return password;
+    }
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }

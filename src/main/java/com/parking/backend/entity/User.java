@@ -45,39 +45,87 @@ public class User {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public String getDocument() { return document; }
-    public void setDocument(String document) { this.document = document; }
+    public String getDocument() {
+        return document;
+    }
+    public void setDocument(String document) {
+        this.document = document;
+    }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public String getName() {
+        return name;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    public String getPhone() { return phone; }
-    public void setPhone(String phone) { this.phone = phone; }
+    public String getPhone() {
+        return phone;
+    }
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
 
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
+    public String getUsername() {
+        return username;
+    }
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
-    public String getPasswordHash() { return passwordHash; }
-    public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+    public void setPasswordHash(String passwordHash) {
+        this.passwordHash = passwordHash;
+    }
 
-    public Role getRole() { return role; }
-    public void setRole(Role role) { this.role = role; }
+    public Role getRole() {
+        return role;
+    }
+    public void setRole(Role role) {
+        this.role = role;
+    }
 
-    public Boolean getActive() { return active; }
-    public void setActive(Boolean active) { this.active = active; }
+    public Boolean getActive() {
+        return active;
+    }
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
 
-    public Integer getFailedAttempts() { return failedAttempts; }
-    public void setFailedAttempts(Integer failedAttempts) { this.failedAttempts = failedAttempts; }
+    public Integer getFailedAttempts() {
+        return failedAttempts;
+    }
+    public void setFailedAttempts(Integer failedAttempts) {
+        this.failedAttempts = failedAttempts;
+    }
 
-    public Boolean getBlocked() { return blocked; }
-    public void setBlocked(Boolean blocked) { this.blocked = blocked; }
+    public Boolean getBlocked() {
+        return blocked;
+    }
+    public void setBlocked(Boolean blocked) {
+        this.blocked = blocked;
+    }
 
-    public ParkingLot getParkingLot() { return parkingLot; }
-    public void setParkingLot(ParkingLot parkingLot) { this.parkingLot = parkingLot; }
+    public ParkingLot getParkingLot() {
+        return parkingLot;
+    }
+    public void setParkingLot(ParkingLot parkingLot) {
+        this.parkingLot = parkingLot;
+    }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
 }
