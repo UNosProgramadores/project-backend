@@ -1,7 +1,10 @@
 package com.parking.backend.controller;
 
 import com.parking.backend.dto.ParkingLotRequest;
+import com.parking.backend.dto.VehicleExitRequest;
+import com.parking.backend.dto.VehicleExitResponse;
 import com.parking.backend.entity.ParkingLot;
+import com.parking.backend.service.EntryRecordService;
 import com.parking.backend.service.ParkingLotService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -15,9 +18,12 @@ import java.util.List;
 public class ParkingLotController {
 
     private final ParkingLotService parkingLotService;
+    private final EntryRecordService entryRecordService;
 
-    public ParkingLotController(ParkingLotService parkingLotService) {
+    public ParkingLotController(ParkingLotService parkingLotService,
+                                EntryRecordService entryRecordService) {
         this.parkingLotService = parkingLotService;
+        this.entryRecordService = entryRecordService;
     }
 
     @GetMapping
@@ -44,5 +50,17 @@ public class ParkingLotController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         parkingLotService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/{parkingLotId}/exit")
+    public ResponseEntity<VehicleExitResponse> registerExit(
+            @PathVariable Long parkingLotId,
+            @RequestBody VehicleExitRequest request) {
+        try {
+            VehicleExitResponse response = entryRecordService.registerExit(request);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 }

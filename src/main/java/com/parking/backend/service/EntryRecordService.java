@@ -8,15 +8,19 @@ import org.springframework.stereotype.Service;
 import com.parking.backend.repository.ParkingLotRepository;
 
 import com.parking.backend.dto.VehicleEntryRequest;
+import com.parking.backend.dto.VehicleExitRequest;
+import com.parking.backend.dto.VehicleExitResponse;
 import com.parking.backend.entity.Cell;
 import com.parking.backend.entity.EntryRecord;
 import com.parking.backend.entity.ParkingLot;
 import com.parking.backend.entity.Vehicle;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 
 @Service
-    public class EntryRecordService {
+public class EntryRecordService {
+
     private final ParkingLotRepository parkingLotRepository;
     private final EntryRecordRepository entryRecordRepository;
     private final VehicleRepository vehicleRepository;
@@ -53,7 +57,6 @@ import java.time.LocalDateTime;
             ).orElseThrow(() ->
                     new RuntimeException("Vehicle not found")
             );
-
         } else if (request.getBikeRegistration() != null &&
                 !request.getBikeRegistration().isBlank()) {
 
@@ -62,14 +65,12 @@ import java.time.LocalDateTime;
             ).orElseThrow(() ->
                     new RuntimeException("Vehicle not found")
             );
-
         } else {
 
             throw new RuntimeException(
                     "Plate or bike registration is required"
             );
         }
-
         entryRecordRepository.findByVehicleAndStatus(
                 vehicle,
                 "active"
@@ -78,7 +79,6 @@ import java.time.LocalDateTime;
                     "Vehicle already inside parking lot"
             );
         });
-
         Cell cell = cellRepository
                 .findFirstByParkingLotAndVehicleTypeAndStatus(
                         parkingLot,
@@ -90,7 +90,6 @@ import java.time.LocalDateTime;
                                 "No available cell found"
                         )
                 );
-
         EntryRecord entryRecord = new EntryRecord();
 
         entryRecord.setVehicle(vehicle);
@@ -103,5 +102,50 @@ import java.time.LocalDateTime;
         cellRepository.save(cell);
 
         return entryRecordRepository.save(entryRecord);
+    }
+
+    public VehicleExitResponse registerExit(VehicleExitRequest request) {
+
+        Vehicle vehicle;
+
+        if (request.getPlate() != null && !request.getPlate().isBlank()) {
+            vehicle = vehicleRepository.findByPlate(request.getPlate())
+                    .orElseThrow(() -> new RuntimeException("Vehicle not found"));
+
+        } else if (request.getBikeRegistration() != null && !request.getBikeRegistration().isBlank()) {
+            vehicle = vehicleRepository.findByBikeRegistration(request.getBikeRegistration())
+                    .orElseThrow(() -> new RuntimeException("Vehicle not found"));
+
+        } else {
+            throw new RuntimeException("Plate or bike registration is required");
+        }
+
+        EntryRecord record = entryRecordRepository.findByVehicleAndStatus(vehicle, "active")
+                .orElseThrow(() -> new RuntimeException("No active entry found for this vehicle"));
+
+        LocalDateTime exitTime = LocalDateTime.now();
+        int duration = (int) ChronoUnit.MINUTES.between(record.getEntryTime(), exitTime);
+
+        record.setExitTime(exitTime);
+        record.setDuration(duration);
+        record.setStatus("completed");
+
+        Cell cell = record.getCell();
+        cell.setStatus("available");
+        cellRepository.save(cell);
+
+        entryRecordRepository.save(record);
+
+        VehicleExitResponse response = new VehicleExitResponse();
+        response.setEntryRecordId(record.getId());
+        response.setPlate(vehicle.getPlate());
+        response.setBikeRegistration(vehicle.getBikeRegistration());
+        response.setVehicleType(vehicle.getVehicleType().getName());
+        response.setCellCode(cell.getCode());
+        response.setEntryTime(record.getEntryTime());
+        response.setExitTime(exitTime);
+        response.setDuration(duration);
+
+        return response;
     }
 }
