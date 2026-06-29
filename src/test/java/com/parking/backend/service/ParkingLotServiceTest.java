@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -76,10 +77,29 @@ class ParkingLotServiceTest {
         verify(parkingLotRepository, never()).save(any());
     }
 
+    // ── Update ────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("Update throws when the parqueadero does not exist")
+    void updateThrowsWhenLotNotFound() {
+        when(parkingLotRepository.findById(99L)).thenReturn(Optional.empty());
+
+        ParkingLotRequest req = buildRequest(LocalTime.of(8, 0), LocalTime.of(20, 0));
+
+        RuntimeException ex = assertThrows(
+                RuntimeException.class,
+                () -> parkingLotService.update(99L, req),
+                "Should throw when the ID does not exist"
+        );
+
+        assertTrue(ex.getMessage().contains("99"),
+                "Error should mention the missing ID");
+    }
+
     // ── Delete ────────────────────────────────────────────────────────────────
 
     @Test
-    @DisplayName("Delete removes the parqueadero when the ID exists")
+    @DisplayName("Delete removes the parking lot when the ID exists")
     void deleteSucceedsWhenLotExists() {
         when(parkingLotRepository.existsById(1L)).thenReturn(true);
         doNothing().when(parkingLotRepository).deleteById(1L);
@@ -87,6 +107,52 @@ class ParkingLotServiceTest {
         assertDoesNotThrow(() -> parkingLotService.delete(1L));
 
         verify(parkingLotRepository, times(1)).deleteById(1L);
+    }
+
+    @Test
+    @DisplayName("Delete throws when the parking lot does not exist")
+    void deleteThrowsWhenLotNotFound() {
+        when(parkingLotRepository.existsById(99L)).thenReturn(false);
+
+        RuntimeException ex = assertThrows(
+                RuntimeException.class,
+                () -> parkingLotService.delete(99L),
+                "Should throw when trying to delete a non-existent lot"
+        );
+
+        assertTrue(ex.getMessage().contains("eliminar"),
+                "Error message should mention 'eliminar' (delete)");
+
+        verify(parkingLotRepository, never()).deleteById(any());
+    }
+
+    // ── getById ───────────────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("getById returns the parking lot when the ID exists")
+    void getByIdReturnsLot() {
+        ParkingLot lot = buildSavedLot(1L);
+        when(parkingLotRepository.findById(1L)).thenReturn(Optional.of(lot));
+
+        ParkingLot result = parkingLotService.getById(1L);
+
+        assertNotNull(result);
+        assertEquals(1L, result.getId());
+    }
+
+    @Test
+    @DisplayName("getById throws when the ID does not exist")
+    void getByIdThrowsWhenNotFound() {
+        when(parkingLotRepository.findById(404L)).thenReturn(Optional.empty());
+
+        RuntimeException ex = assertThrows(
+                RuntimeException.class,
+                () -> parkingLotService.getById(404L),
+                "Should throw when the lot is not found"
+        );
+
+        assertTrue(ex.getMessage().contains("404"),
+                "Error should mention the missing ID");
     }
 
     // ── getAll ────────────────────────────────────────────────────────────────
@@ -102,6 +168,4 @@ class ParkingLotServiceTest {
         assertEquals(2, result.size(), "Should return exactly 2 lots");
         verify(parkingLotRepository, times(1)).findAll();
     }
-
-
 }
