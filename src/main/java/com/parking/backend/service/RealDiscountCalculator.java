@@ -42,11 +42,11 @@ public class RealDiscountCalculator implements DiscountService {
         boolean qualifies = false;
 
         if (config.getMinExternalInvoice() != null) {
-            qualifies = paymentRepository.existsCompletedWithInvoiceRefByUserAndParkingLot(user, parkingLot);
+            qualifies = paymentRepository.existsByEntryRecord_Vehicle_OwnerAndEntryRecord_Cell_ParkingLotAndEntryRecord_StatusAndExternalInvoiceRefIsNotNull(user, parkingLot, "completed");
         }
 
         if (!qualifies && config.getMinVisits() != null) {
-            long visits = entryRecordRepository.countCompletedByOwnerAndParkingLot(user, parkingLot);
+            long visits = entryRecordRepository.countByVehicle_OwnerAndCell_ParkingLotAndStatus(user, parkingLot, "completed");
             qualifies = visits >= config.getMinVisits();
         }
 

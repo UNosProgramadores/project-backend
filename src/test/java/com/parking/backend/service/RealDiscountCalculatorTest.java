@@ -88,7 +88,7 @@ class RealDiscountCalculatorTest {
         User user = buildUser();
         DiscountConfig config = buildConfig(new BigDecimal("50"), null, new BigDecimal("10"));
         when(discountConfigRepository.findByParkingLotAndActiveTrue(lot)).thenReturn(Optional.of(config));
-        when(paymentRepository.existsCompletedWithInvoiceRefByUserAndParkingLot(user, lot)).thenReturn(true);
+        when(paymentRepository.existsByEntryRecord_Vehicle_OwnerAndEntryRecord_Cell_ParkingLotAndEntryRecord_StatusAndExternalInvoiceRefIsNotNull(user, lot, "completed")).thenReturn(true);
 
         BigDecimal result = calculator.calculateDiscount(lot, user, new BigDecimal("200"));
 
@@ -102,7 +102,7 @@ class RealDiscountCalculatorTest {
         User user = buildUser();
         DiscountConfig config = buildConfig(null, 3, new BigDecimal("10"));
         when(discountConfigRepository.findByParkingLotAndActiveTrue(lot)).thenReturn(Optional.of(config));
-        when(entryRecordRepository.countCompletedByOwnerAndParkingLot(user, lot)).thenReturn(5L);
+        when(entryRecordRepository.countByVehicle_OwnerAndCell_ParkingLotAndStatus(user, lot, "completed")).thenReturn(5L);
 
         BigDecimal result = calculator.calculateDiscount(lot, user, new BigDecimal("100"));
 
@@ -116,8 +116,8 @@ class RealDiscountCalculatorTest {
         User user = buildUser();
         DiscountConfig config = buildConfig(new BigDecimal("50"), 3, new BigDecimal("10"));
         when(discountConfigRepository.findByParkingLotAndActiveTrue(lot)).thenReturn(Optional.of(config));
-        when(paymentRepository.existsCompletedWithInvoiceRefByUserAndParkingLot(user, lot)).thenReturn(false);
-        when(entryRecordRepository.countCompletedByOwnerAndParkingLot(user, lot)).thenReturn(1L);
+        when(paymentRepository.existsByEntryRecord_Vehicle_OwnerAndEntryRecord_Cell_ParkingLotAndEntryRecord_StatusAndExternalInvoiceRefIsNotNull(user, lot, "completed")).thenReturn(false);
+        when(entryRecordRepository.countByVehicle_OwnerAndCell_ParkingLotAndStatus(user, lot, "completed")).thenReturn(1L);
 
         BigDecimal result = calculator.calculateDiscount(lot, user, new BigDecimal("100"));
 
@@ -131,12 +131,12 @@ class RealDiscountCalculatorTest {
         User user = buildUser();
         DiscountConfig config = buildConfig(new BigDecimal("50"), 3, new BigDecimal("10"));
         when(discountConfigRepository.findByParkingLotAndActiveTrue(lot)).thenReturn(Optional.of(config));
-        when(paymentRepository.existsCompletedWithInvoiceRefByUserAndParkingLot(user, lot)).thenReturn(true);
+        when(paymentRepository.existsByEntryRecord_Vehicle_OwnerAndEntryRecord_Cell_ParkingLotAndEntryRecord_StatusAndExternalInvoiceRefIsNotNull(user, lot, "completed")).thenReturn(true);
 
         BigDecimal result = calculator.calculateDiscount(lot, user, new BigDecimal("100"));
 
         assertEquals(new BigDecimal("10"), result);
-        verify(entryRecordRepository, never()).countCompletedByOwnerAndParkingLot(any(), any());
+        verify(entryRecordRepository, never()).countByVehicle_OwnerAndCell_ParkingLotAndStatus(any(), any(), any());
     }
 
     @Test
@@ -146,7 +146,7 @@ class RealDiscountCalculatorTest {
         User user = buildUser();
         DiscountConfig config = buildConfig(new BigDecimal("50"), 3, new BigDecimal("10"));
         when(discountConfigRepository.findByParkingLotAndActiveTrue(lot)).thenReturn(Optional.of(config));
-        when(paymentRepository.existsCompletedWithInvoiceRefByUserAndParkingLot(user, lot)).thenReturn(true);
+        when(paymentRepository.existsByEntryRecord_Vehicle_OwnerAndEntryRecord_Cell_ParkingLotAndEntryRecord_StatusAndExternalInvoiceRefIsNotNull(user, lot, "completed")).thenReturn(true);
 
         BigDecimal result = calculator.calculateDiscount(lot, user, BigDecimal.ZERO);
 

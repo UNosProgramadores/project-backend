@@ -10,9 +10,13 @@ import com.parking.backend.dto.VehicleExitRequest;
 import com.parking.backend.repository.CellRepository;
 import com.parking.backend.repository.EntryRecordRepository;
 import com.parking.backend.repository.ParkingLotRepository;
+import com.parking.backend.repository.PaymentRepository;
 import com.parking.backend.repository.RateRepository;
 import com.parking.backend.repository.UserRepository;
 import com.parking.backend.repository.VehicleRepository;
+import com.parking.backend.repository.VehicleTypeRepository;
+import com.parking.backend.entity.Payment;
+import com.parking.backend.entity.Rate;
 import com.parking.backend.entity.User;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,6 +31,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -54,6 +59,15 @@ class EntryRecordServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private VehicleTypeRepository vehicleTypeRepository;
+
+    @Mock
+    private DiscountService discountService;
+
+    @Mock
+    private PaymentRepository paymentRepository;
 
     @InjectMocks
     private EntryRecordService entryRecordService;
@@ -198,7 +212,7 @@ class EntryRecordServiceTest {
     }
 
     @Test
-    @DisplayName("Register exit assigns recordedBy and returns exit response")
+    @DisplayName("Register exit assigns recordedBy, creates payment, and returns exit response")
     void registerExitSetsRecordedBy() {
         EntryRecord activeRecord = new EntryRecord();
         activeRecord.setId(1L);
@@ -207,10 +221,21 @@ class EntryRecordServiceTest {
         activeRecord.setEntryTime(java.time.LocalDateTime.now().minusHours(2));
         activeRecord.setStatus("active");
 
+        Rate rate = new Rate();
+        rate.setId(1L);
+        rate.setParkingLot(parkingLot);
+        rate.setVehicleType(carType);
+        rate.setRateType("flat");
+        rate.setCost(new BigDecimal("50"));
+        rate.setActive(true);
+
         when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
         when(entryRecordRepository.findByVehicleAndStatus(car, "active"))
                 .thenReturn(Optional.of(activeRecord));
         when(userRepository.findByUsername("lgomez")).thenReturn(Optional.of(staffUser));
+        when(rateRepository.findByParkingLotAndVehicleTypeAndActive(parkingLot, carType, true))
+                .thenReturn(Optional.of(rate));
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(inv -> inv.getArgument(0));
 
         var response = entryRecordService.registerExit(exitRequest);
 
@@ -221,6 +246,9 @@ class EntryRecordServiceTest {
         assertNotNull(response.getExitTime());
         assertNotNull(response.getDuration());
         assertTrue(response.getDuration() > 0);
+        assertEquals(new BigDecimal("50"), response.getSubtotal());
+        assertEquals(BigDecimal.ZERO, response.getDiscountAmount());
+        assertEquals(new BigDecimal("50"), response.getTotalPaid());
 
         verify(entryRecordRepository, times(1)).save(argThat(r ->
                 "completed".equals(r.getStatus())
@@ -228,6 +256,7 @@ class EntryRecordServiceTest {
                         && "lgomez".equals(r.getRecordedBy().getUsername())
         ));
         verify(userRepository, times(1)).findByUsername("lgomez");
+        verify(paymentRepository, times(1)).save(any(Payment.class));
     }
 
     @Test
