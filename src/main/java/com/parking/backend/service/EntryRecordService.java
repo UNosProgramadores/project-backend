@@ -2,6 +2,7 @@ package com.parking.backend.service;
 
 import com.parking.backend.repository.CellRepository;
 import com.parking.backend.repository.EntryRecordRepository;
+import com.parking.backend.repository.PaymentRepository;
 import com.parking.backend.repository.RateRepository;
 import com.parking.backend.repository.UserRepository;
 import com.parking.backend.repository.VehicleRepository;
@@ -15,12 +16,15 @@ import com.parking.backend.dto.VehicleExitResponse;
 import com.parking.backend.entity.Cell;
 import com.parking.backend.entity.EntryRecord;
 import com.parking.backend.entity.ParkingLot;
+import com.parking.backend.entity.Payment;
+import com.parking.backend.entity.Rate;
 import com.parking.backend.entity.User;
 import com.parking.backend.entity.Vehicle;
 import com.parking.backend.entity.VehicleType;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
@@ -34,6 +38,8 @@ public class EntryRecordService {
     private final RateRepository rateRepository;
     private final UserRepository userRepository;
     private final VehicleTypeRepository vehicleTypeRepository;
+    private final DiscountService discountService;
+    private final PaymentRepository paymentRepository;
 
     public EntryRecordService(ParkingLotRepository parkingLotRepository,
                               EntryRecordRepository entryRecordRepository,
@@ -41,7 +47,9 @@ public class EntryRecordService {
                               CellRepository cellRepository,
                               RateRepository rateRepository,
                               UserRepository userRepository,
-                              VehicleTypeRepository vehicleTypeRepository) {
+                              VehicleTypeRepository vehicleTypeRepository,
+                              DiscountService discountService,
+                              PaymentRepository paymentRepository) {
         this.parkingLotRepository = parkingLotRepository;
         this.entryRecordRepository = entryRecordRepository;
         this.vehicleRepository = vehicleRepository;
@@ -49,6 +57,8 @@ public class EntryRecordService {
         this.rateRepository = rateRepository;
         this.userRepository = userRepository;
         this.vehicleTypeRepository = vehicleTypeRepository;
+        this.discountService = discountService;
+        this.paymentRepository = paymentRepository;
     }
 
     private Vehicle findOrCreateVehicle(String plate, String bikeRegistration, Long vehicleTypeId) {
@@ -155,6 +165,35 @@ public class EntryRecordService {
 
         entryRecordRepository.save(record);
 
+        ParkingLot parkingLot = cell.getParkingLot();
+        Rate rate = rateRepository
+                .findByParkingLotAndVehicleTypeAndActive(parkingLot, vehicle.getVehicleType(), true)
+                .orElseThrow(() -> new RuntimeException("No active rate found for this vehicle type"));
+
+        BigDecimal subtotal = "per_minute".equals(rate.getRateType())
+                ? rate.getCost().multiply(BigDecimal.valueOf(duration))
+                : rate.getCost();
+
+        User owner = vehicle.getOwner();
+        BigDecimal discountAmount = (owner != null)
+                ? discountService.calculateDiscount(parkingLot, owner, subtotal)
+                : BigDecimal.ZERO;
+        BigDecimal totalPaid = subtotal.subtract(discountAmount);
+
+        // ponytail: both discounts in same config row — if both apply, the greater wins (handled in DiscountService)
+        BigDecimal discountPercentage = discountAmount.compareTo(BigDecimal.ZERO) > 0
+                ? discountAmount.multiply(BigDecimal.valueOf(100)).divide(subtotal, java.math.RoundingMode.HALF_UP)
+                : BigDecimal.ZERO;
+
+        Payment payment = new Payment();
+        payment.setEntryRecord(record);
+        payment.setSubtotal(subtotal);
+        payment.setDiscountPercentage(discountPercentage);
+        payment.setDiscountAmount(discountAmount);
+        payment.setTotalPaid(totalPaid);
+        payment.setPaymentDate(LocalDateTime.now());
+        paymentRepository.save(payment);
+
         VehicleExitResponse response = new VehicleExitResponse();
         response.setEntryRecordId(record.getId());
         response.setPlate(vehicle.getPlate());
@@ -164,6 +203,10 @@ public class EntryRecordService {
         response.setEntryTime(record.getEntryTime());
         response.setExitTime(exitTime);
         response.setDuration(duration);
+        response.setSubtotal(subtotal);
+        response.setDiscountPercentage(discountPercentage);
+        response.setDiscountAmount(discountAmount);
+        response.setTotalPaid(totalPaid);
 
         return response;
     }
