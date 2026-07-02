@@ -1,8 +1,10 @@
 package com.parking.backend.controller;
 
 import com.parking.backend.dto.ParkingLotRequest;
+import com.parking.backend.dto.VehicleEntryRequest;
 import com.parking.backend.dto.VehicleExitRequest;
 import com.parking.backend.dto.VehicleExitResponse;
+import com.parking.backend.entity.EntryRecord;
 import com.parking.backend.entity.ParkingLot;
 import com.parking.backend.service.EntryRecordService;
 import com.parking.backend.service.ParkingLotService;
@@ -52,15 +54,28 @@ public class ParkingLotController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/{parkingLotId}/entry")
+    public ResponseEntity<?> registerEntry(
+            @PathVariable Long parkingLotId,
+            @RequestBody VehicleEntryRequest request) {
+        try {
+            request.setParkingLotId(parkingLotId);
+            EntryRecord record = entryRecordService.registerEntry(request);
+            return new ResponseEntity<>(record, HttpStatus.CREATED);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     @PostMapping("/{parkingLotId}/exit")
-    public ResponseEntity<VehicleExitResponse> registerExit(
+    public ResponseEntity<?> registerExit(
             @PathVariable Long parkingLotId,
             @RequestBody VehicleExitRequest request) {
         try {
             VehicleExitResponse response = entryRecordService.registerExit(request);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 }
