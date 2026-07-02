@@ -54,6 +54,11 @@ public class ParkingLotController {
         return ResponseEntity.noContent().build();
     }
 
+    @PatchMapping("/{id}/discounts/toggle")
+    public ResponseEntity<ParkingLot> toggleDiscounts(@PathVariable Long id) {
+        return ResponseEntity.ok(parkingLotService.toggleDiscountsEnabled(id));
+    }
+
     @PostMapping("/{parkingLotId}/entry")
     public ResponseEntity<?> registerEntry(
             @PathVariable Long parkingLotId,
