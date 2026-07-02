@@ -1,17 +1,21 @@
 package com.parking.backend.service;
 
 import com.parking.backend.dto.ParkingLotRequest;
+import com.parking.backend.entity.Cell;
 import com.parking.backend.entity.ParkingLot;
+import com.parking.backend.repository.CellRepository;
 import com.parking.backend.repository.ParkingLotRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,6 +28,9 @@ class ParkingLotServiceTest {
 
     @Mock
     private ParkingLotRepository parkingLotRepository;
+
+    @Mock
+    private CellRepository cellRepository;
 
     @InjectMocks
     private ParkingLotService parkingLotService;
@@ -75,6 +82,34 @@ class ParkingLotServiceTest {
                 "Error message should mention 'apertura' (opening time)");
 
         verify(parkingLotRepository, never()).save(any());
+        verify(cellRepository, never()).saveAll(any());
+    }
+
+    // ── Create with cell generation (RF_01) ────────────────────────────────────
+
+    @Test
+    @DisplayName("Create generates rows × columns cells")
+    void createGeneratesCells() {
+        ParkingLotRequest req = buildRequest(LocalTime.of(6, 0), LocalTime.of(22, 0));
+        ParkingLot savedLot = buildSavedLot(1L);
+
+        when(parkingLotRepository.save(any(ParkingLot.class))).thenReturn(savedLot);
+
+        ParkingLot result = parkingLotService.create(req);
+
+        assertNotNull(result);
+        verify(parkingLotRepository, times(1)).save(any(ParkingLot.class));
+
+        ArgumentCaptor<List<Cell>> captor = ArgumentCaptor.captor();
+        verify(cellRepository, times(1)).saveAll(captor.capture());
+
+        List<Cell> generated = captor.getValue();
+        assertEquals(50, generated.size(), "5 rows × 10 cols = 50 cells");
+        Cell first = generated.getFirst();
+        assertEquals(1, first.getRow().intValue());
+        assertEquals(1, first.getCol().intValue());
+        assertEquals("parking", first.getCellType());
+        assertEquals("available", first.getStatus());
     }
 
     // ── Update ────────────────────────────────────────────────
@@ -94,6 +129,25 @@ class ParkingLotServiceTest {
 
         assertTrue(ex.getMessage().contains("99"),
                 "Error should mention the missing ID");
+    }
+
+    @Test
+    @DisplayName("Update adds cells when dimensions increase")
+    void updateAddsCellsWhenDimensionsIncrease() {
+        ParkingLot existing = buildSavedLot(1L);
+        when(parkingLotRepository.findById(1L)).thenReturn(Optional.of(existing));
+        when(parkingLotRepository.save(any(ParkingLot.class))).thenReturn(existing);
+        when(cellRepository.findByParkingLot(existing)).thenReturn(Collections.emptyList());
+
+        ParkingLotRequest req = buildRequest(LocalTime.of(6, 0), LocalTime.of(22, 0));
+        req.setRows(6);
+        req.setColumns(12);
+
+        parkingLotService.update(1L, req);
+
+        ArgumentCaptor<List<Cell>> captor = ArgumentCaptor.captor();
+        verify(cellRepository, times(1)).saveAll(captor.capture());
+        assertEquals(72, captor.getValue().size());
     }
 
     // ── Delete ────────────────────────────────────────────────────────────────
@@ -167,5 +221,20 @@ class ParkingLotServiceTest {
 
         assertEquals(2, result.size(), "Should return exactly 2 lots");
         verify(parkingLotRepository, times(1)).findAll();
+    }
+
+    // ── toggleDiscountsEnabled ────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("toggleDiscountsEnabled flips the flag")
+    void toggleDiscountsEnabledFlipsFlag() {
+        ParkingLot lot = buildSavedLot(1L);
+        lot.setDiscountsEnabled(false);
+        when(parkingLotRepository.findById(1L)).thenReturn(Optional.of(lot));
+        when(parkingLotRepository.save(any(ParkingLot.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        ParkingLot result = parkingLotService.toggleDiscountsEnabled(1L);
+
+        assertTrue(result.getDiscountsEnabled());
     }
 }

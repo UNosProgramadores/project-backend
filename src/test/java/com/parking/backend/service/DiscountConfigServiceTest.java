@@ -116,20 +116,28 @@ class DiscountConfigServiceTest {
     }
 
     @Test
-    @DisplayName("update modifies existing discount config")
-    void updateSuccess() {
+    @DisplayName("update versiones: cierra registro anterior y crea uno nuevo")
+    void updateVersions() {
         ParkingLot lot = buildLot(1L);
         DiscountConfig existing = buildConfig(1L, lot);
+        existing.setActive(true);
         DiscountConfigRequest req = buildRequest();
         req.setDiscountPercentage(new BigDecimal("15"));
+        req.setActive(true);
 
         when(repository.findById(1L)).thenReturn(Optional.of(existing));
         when(repository.save(any(DiscountConfig.class))).thenAnswer(inv -> inv.getArgument(0));
 
         DiscountConfig result = discountConfigService.update(1L, req);
 
+        assertFalse(existing.getActive(), "Old record should be inactive");
+        assertNotNull(existing.getEndDate(), "Old record should have end date");
+
+        assertTrue(result.getActive());
         assertEquals(new BigDecimal("15"), result.getDiscountPercentage());
-        verify(repository, times(1)).save(existing);
+        assertNull(result.getEndDate());
+        assertNotNull(result.getStartDate());
+        verify(repository, times(2)).save(any(DiscountConfig.class));
     }
 
     @Test
