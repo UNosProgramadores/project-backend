@@ -3,6 +3,7 @@ package com.parking.backend.dto;
 public class VehicleEntryRequest {
 
     private Long parkingLotId;
+    private Long vehicleTypeId;
     private String plate;
     private String bikeRegistration;
 
@@ -12,6 +13,14 @@ public class VehicleEntryRequest {
 
     public void setParkingLotId(Long parkingLotId) {
         this.parkingLotId = parkingLotId;
+    }
+
+    public Long getVehicleTypeId() {
+        return vehicleTypeId;
+    }
+
+    public void setVehicleTypeId(Long vehicleTypeId) {
+        this.vehicleTypeId = vehicleTypeId;
     }
 
     public String getPlate() {
