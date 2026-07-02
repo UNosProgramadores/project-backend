@@ -47,6 +47,13 @@ public class ParkingLotService {
     }
 
     @Transactional
+    public ParkingLot toggleDiscountsEnabled(Long id) {
+        ParkingLot lot = getById(id);
+        lot.setDiscountsEnabled(!Boolean.TRUE.equals(lot.getDiscountsEnabled()));
+        return parkingLotRepository.save(lot);
+    }
+
+    @Transactional
     public void delete(Long id) {
         if (!parkingLotRepository.existsById(id)) {
             throw new RuntimeException("No se puede eliminar: Parqueadero no encontrado con ID: " + id);
