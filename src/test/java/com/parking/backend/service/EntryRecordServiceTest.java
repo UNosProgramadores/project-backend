@@ -6,11 +6,15 @@ import com.parking.backend.entity.EntryRecord;
 import com.parking.backend.entity.ParkingLot;
 import com.parking.backend.entity.Vehicle;
 import com.parking.backend.entity.VehicleType;
+import com.parking.backend.dto.VehicleExitRequest;
 import com.parking.backend.repository.CellRepository;
 import com.parking.backend.repository.EntryRecordRepository;
 import com.parking.backend.repository.ParkingLotRepository;
 import com.parking.backend.repository.RateRepository;
+import com.parking.backend.repository.UserRepository;
 import com.parking.backend.repository.VehicleRepository;
+import com.parking.backend.entity.User;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,7 +22,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -43,6 +52,9 @@ class EntryRecordServiceTest {
     @Mock
     private RateRepository rateRepository;
 
+    @Mock
+    private UserRepository userRepository;
+
     @InjectMocks
     private EntryRecordService entryRecordService;
 
@@ -53,12 +65,24 @@ class EntryRecordServiceTest {
     private Cell availableCell;
     private VehicleEntryRequest plateRequest;
     private VehicleEntryRequest bikeRequest;
+    private User staffUser;
+    private VehicleExitRequest exitRequest;
 
     @BeforeEach
     void setUp() {
         parkingLot = new ParkingLot();
         parkingLot.setId(1L);
         parkingLot.setName("ParKing Downtown");
+
+        staffUser = new User();
+        staffUser.setId(3L);
+        staffUser.setUsername("lgomez");
+        staffUser.setName("Laura Gomez");
+
+        Authentication auth = new UsernamePasswordAuthenticationToken(
+                "lgomez", null, List.of(new SimpleGrantedAuthority("ROLE_STAFF"))
+        );
+        SecurityContextHolder.getContext().setAuthentication(auth);
 
         carType = new VehicleType();
         carType.setId(1L);
@@ -92,6 +116,14 @@ class EntryRecordServiceTest {
         bikeRequest = new VehicleEntryRequest();
         bikeRequest.setParkingLotId(1L);
         bikeRequest.setBikeRegistration("BIKE-001");
+
+        exitRequest = new VehicleExitRequest();
+        exitRequest.setPlate("ABC-123");
+    }
+
+    @AfterEach
+    void tearDown() {
+        SecurityContextHolder.clearContext();
     }
 
     @Test
@@ -99,6 +131,7 @@ class EntryRecordServiceTest {
     void registerEntryWithPlateSuccess() {
         when(parkingLotRepository.findById(1L)).thenReturn(Optional.of(parkingLot));
         when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
+        when(userRepository.findByUsername("lgomez")).thenReturn(Optional.of(staffUser));
         when(cellRepository.findFirstByParkingLotAndVehicleTypeAndStatus(
                 parkingLot, carType, "available"))
                 .thenReturn(Optional.of(availableCell));
@@ -112,6 +145,8 @@ class EntryRecordServiceTest {
         assertEquals(availableCell, result.getCell());
         assertEquals("active", result.getStatus());
         assertNotNull(result.getEntryTime());
+        assertNotNull(result.getRecordedBy());
+        assertEquals("Laura Gomez", result.getRecordedBy().getName());
 
         verify(cellRepository, times(1)).save(availableCell);
         assertEquals("occupied", availableCell.getStatus());
@@ -140,6 +175,59 @@ class EntryRecordServiceTest {
         verify(cellRepository, times(1)).save(availableCell);
         assertEquals("occupied", availableCell.getStatus());
         verify(entryRecordRepository, times(1)).save(any(EntryRecord.class));
+    }
+
+    @Test
+    @DisplayName("Register entry with plate assigns recordedBy from authenticated user")
+    void registerEntrySetsRecordedBy() {
+        when(parkingLotRepository.findById(1L)).thenReturn(Optional.of(parkingLot));
+        when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
+        when(userRepository.findByUsername("lgomez")).thenReturn(Optional.of(staffUser));
+        when(cellRepository.findFirstByParkingLotAndVehicleTypeAndStatus(
+                parkingLot, carType, "available"))
+                .thenReturn(Optional.of(availableCell));
+        when(entryRecordRepository.save(any(EntryRecord.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        EntryRecord result = entryRecordService.registerEntry(plateRequest);
+
+        assertNotNull(result.getRecordedBy());
+        assertEquals(3L, result.getRecordedBy().getId());
+        assertEquals("lgomez", result.getRecordedBy().getUsername());
+        verify(userRepository, times(1)).findByUsername("lgomez");
+    }
+
+    @Test
+    @DisplayName("Register exit assigns recordedBy and returns exit response")
+    void registerExitSetsRecordedBy() {
+        EntryRecord activeRecord = new EntryRecord();
+        activeRecord.setId(1L);
+        activeRecord.setVehicle(car);
+        activeRecord.setCell(availableCell);
+        activeRecord.setEntryTime(java.time.LocalDateTime.now().minusHours(2));
+        activeRecord.setStatus("active");
+
+        when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
+        when(entryRecordRepository.findByVehicleAndStatus(car, "active"))
+                .thenReturn(Optional.of(activeRecord));
+        when(userRepository.findByUsername("lgomez")).thenReturn(Optional.of(staffUser));
+
+        var response = entryRecordService.registerExit(exitRequest);
+
+        assertNotNull(response);
+        assertEquals(1L, response.getEntryRecordId());
+        assertEquals("ABC-123", response.getPlate());
+        assertEquals("car", response.getVehicleType());
+        assertNotNull(response.getExitTime());
+        assertNotNull(response.getDuration());
+        assertTrue(response.getDuration() > 0);
+
+        verify(entryRecordRepository, times(1)).save(argThat(r ->
+                "completed".equals(r.getStatus())
+                        && r.getRecordedBy() != null
+                        && "lgomez".equals(r.getRecordedBy().getUsername())
+        ));
+        verify(userRepository, times(1)).findByUsername("lgomez");
     }
 
     @Test
