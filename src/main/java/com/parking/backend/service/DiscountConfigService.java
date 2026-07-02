@@ -42,8 +42,14 @@ public class DiscountConfigService {
 
     @Transactional
     public DiscountConfig update(Long id, DiscountConfigRequest request) {
-        DiscountConfig config = getById(id);
-        applyRequest(config, request, config.getParkingLot());
+        DiscountConfig existing = getById(id);
+        // RF_08: close the active record and create a new one
+        existing.setActive(false);
+        existing.setEndDate(LocalDateTime.now());
+        repository.save(existing);
+
+        DiscountConfig config = new DiscountConfig();
+        applyRequest(config, request, existing.getParkingLot());
         return repository.save(config);
     }
 
