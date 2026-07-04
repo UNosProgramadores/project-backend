@@ -1,5 +1,7 @@
 package com.parking.backend.service;
 
+import com.parking.backend.dto.CellDto;
+import com.parking.backend.dto.ParkingMapResponse;
 import com.parking.backend.entity.Cell;
 import com.parking.backend.entity.ParkingLot;
 import com.parking.backend.entity.VehicleType;
@@ -8,6 +10,7 @@ import com.parking.backend.repository.VehicleTypeRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -28,6 +31,40 @@ public class CellService {
     public List<Cell> getByParkingLot(Long parkingLotId) {
         ParkingLot lot = parkingLotService.getById(parkingLotId);
         return cellRepository.findByParkingLot(lot);
+    }
+
+    public ParkingMapResponse getMap(Long parkingLotId) {
+        ParkingLot lot = parkingLotService.getById(parkingLotId);
+        List<Cell> cells = cellRepository.findByParkingLot(lot);
+
+        List<List<CellDto>> grid = new ArrayList<>();
+        for (int r = 1; r <= lot.getRows(); r++) {
+            List<CellDto> row = new ArrayList<>();
+            for (int c = 1; c <= lot.getColumns(); c++) {
+                row.add(null);
+            }
+            grid.add(row);
+        }
+
+        for (Cell cell : cells) {
+            CellDto dto = new CellDto(
+                    cell.getId(),
+                    cell.getRow(),
+                    cell.getCol(),
+                    cell.getCode(),
+                    cell.getCellType(),
+                    cell.getStatus(),
+                    cell.getVehicleType() != null ? cell.getVehicleType().getId() : null,
+                    cell.getVehicleType() != null ? cell.getVehicleType().getName() : null,
+                    cell.getReservedForStaff()
+            );
+            grid.get(cell.getRow() - 1).set(cell.getCol() - 1, dto);
+        }
+
+        return new ParkingMapResponse(
+                lot.getId(), lot.getName(),
+                lot.getRows(), lot.getColumns(), grid
+        );
     }
 
     public Cell getById(Long id) {
