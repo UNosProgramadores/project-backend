@@ -76,7 +76,7 @@ public class ParkingLotController {
     @PostMapping("/{parkingLotId}/entry")
     public ResponseEntity<?> registerEntry(
             @PathVariable Long parkingLotId,
-            @RequestBody VehicleEntryRequest request) {
+            @Valid @RequestBody VehicleEntryRequest request) {
         try {
             request.setParkingLotId(parkingLotId);
             EntryRecord record = entryRecordService.registerEntry(request);
