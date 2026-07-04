@@ -44,6 +44,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/parking-lots/*/active-entries").hasAnyRole("ADMIN", "STAFF")
                         .requestMatchers("/api/parking-lots/*/payments/**").hasAnyRole("ADMIN", "STAFF")
                         .requestMatchers("/api/parking-lots/*/reports/**").hasAnyRole("ADMIN", "STAFF")
+                        .requestMatchers("/api/invoices/**").hasAnyRole("ADMIN", "STAFF")
 
                         .requestMatchers(HttpMethod.GET, "/api/parking-lots/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/parking-lots/**").hasRole("ADMIN")
