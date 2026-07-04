@@ -106,17 +106,9 @@ public class EntryRecordService {
                     "Vehicle already inside parking lot"
             );
         });
-        Cell cell = cellRepository
-                .findFirstByParkingLotAndVehicleTypeAndStatus(
-                        parkingLot,
-                        vehicle.getVehicleType(),
-                        "available"
-                )
-                .orElseThrow(() ->
-                        new RuntimeException(
-                                "No available cell found"
-                        )
-                );
+
+        Cell cell = resolveCell(parkingLot, vehicle, request);
+
         EntryRecord entryRecord = new EntryRecord();
 
         entryRecord.setVehicle(vehicle);
@@ -130,6 +122,44 @@ public class EntryRecordService {
         cellRepository.save(cell);
 
         return entryRecordRepository.save(entryRecord);
+    }
+
+    private Cell resolveCell(ParkingLot parkingLot, Vehicle vehicle, VehicleEntryRequest request) {
+        if (Boolean.FALSE.equals(parkingLot.getAutoAssignment())) {
+            if (request.getCellId() == null) {
+                throw new RuntimeException(
+                        "Auto-assignment is disabled. A cellId is required."
+                );
+            }
+            Cell cell = cellRepository.findByIdAndParkingLot(request.getCellId(), parkingLot)
+                    .orElseThrow(() -> new RuntimeException(
+                            "Cell not found in this parking lot"
+                    ));
+            if (!"available".equals(cell.getStatus())) {
+                throw new RuntimeException("Selected cell is not available");
+            }
+            if (!"parking".equals(cell.getCellType())) {
+                throw new RuntimeException("Selected cell is not a parking cell");
+            }
+            if (!vehicle.getVehicleType().getId().equals(cell.getVehicleType().getId())) {
+                throw new RuntimeException(
+                        "Selected cell does not support vehicle type " + vehicle.getVehicleType().getName()
+                );
+            }
+            return cell;
+        }
+        return cellRepository
+                .findFirstByParkingLotAndVehicleTypeAndStatusAndReservedForStaff(
+                        parkingLot,
+                        vehicle.getVehicleType(),
+                        "available",
+                        false
+                )
+                .orElseThrow(() ->
+                        new RuntimeException(
+                                "No available cell found"
+                        )
+                );
     }
 
     public VehicleExitResponse registerExit(VehicleExitRequest request) {
@@ -180,7 +210,6 @@ public class EntryRecordService {
                 : BigDecimal.ZERO;
         BigDecimal totalPaid = subtotal.subtract(discountAmount);
 
-        // ponytail: both discounts in same config row — if both apply, the greater wins (handled in DiscountService)
         BigDecimal discountPercentage = discountAmount.compareTo(BigDecimal.ZERO) > 0
                 ? discountAmount.multiply(BigDecimal.valueOf(100)).divide(subtotal, java.math.RoundingMode.HALF_UP)
                 : BigDecimal.ZERO;
@@ -191,6 +220,7 @@ public class EntryRecordService {
         payment.setDiscountPercentage(discountPercentage);
         payment.setDiscountAmount(discountAmount);
         payment.setTotalPaid(totalPaid);
+        payment.setPaymentMethod(request.getPaymentMethod());
         payment.setPaymentDate(LocalDateTime.now());
         paymentRepository.save(payment);
 
