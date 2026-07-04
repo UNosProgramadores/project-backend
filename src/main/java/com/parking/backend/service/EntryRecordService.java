@@ -181,6 +181,11 @@ public class EntryRecordService {
         EntryRecord record = entryRecordRepository.findByVehicleAndStatus(vehicle, "active")
                 .orElseThrow(() -> new RuntimeException("No active entry found for this vehicle"));
 
+        Long recordParkingLotId = record.getCell().getParkingLot().getId();
+        if (!recordParkingLotId.equals(request.getParkingLotId())) {
+            throw new RuntimeException("El vehiculo no se encuentra en este parqueadero");
+        }
+
         LocalDateTime exitTime = LocalDateTime.now();
         int duration = (int) ChronoUnit.MINUTES.between(record.getEntryTime(), exitTime);
 
