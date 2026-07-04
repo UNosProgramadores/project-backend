@@ -77,6 +77,7 @@ public class ParkingLotController {
             @PathVariable Long parkingLotId,
             @RequestBody VehicleExitRequest request) {
         try {
+            request.setParkingLotId(parkingLotId);
             VehicleExitResponse response = entryRecordService.registerExit(request);
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
