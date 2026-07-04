@@ -94,6 +94,7 @@ public class EntryRecordService {
         throw new RuntimeException("Plate or bike registration is required");
     }
 
+    @Transactional
     public EntryRecord registerEntry(VehicleEntryRequest request) {
 
         ParkingLot parkingLot = parkingLotRepository.findById(
