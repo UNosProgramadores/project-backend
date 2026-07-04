@@ -4,6 +4,7 @@ public class VehicleExitRequest {
 
     private String plate;
     private String bikeRegistration;
+    private String paymentMethod;
 
     public String getPlate() {
         return plate;
@@ -19,5 +20,13 @@ public class VehicleExitRequest {
 
     public void setBikeRegistration(String bikeRegistration) {
         this.bikeRegistration = bikeRegistration;
+    }
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
     }
 }

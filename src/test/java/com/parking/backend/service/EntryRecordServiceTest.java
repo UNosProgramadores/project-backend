@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -87,6 +88,7 @@ class EntryRecordServiceTest {
         parkingLot = new ParkingLot();
         parkingLot.setId(1L);
         parkingLot.setName("ParKing Downtown");
+        parkingLot.setAutoAssignment(true);
 
         staffUser = new User();
         staffUser.setId(3L);
@@ -146,8 +148,8 @@ class EntryRecordServiceTest {
         when(parkingLotRepository.findById(1L)).thenReturn(Optional.of(parkingLot));
         when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
         when(userRepository.findByUsername("lgomez")).thenReturn(Optional.of(staffUser));
-        when(cellRepository.findFirstByParkingLotAndVehicleTypeAndStatus(
-                parkingLot, carType, "available"))
+        when(cellRepository.findFirstByParkingLotAndVehicleTypeAndStatusAndReservedForStaff(
+                parkingLot, carType, "available", false))
                 .thenReturn(Optional.of(availableCell));
         when(entryRecordRepository.save(any(EntryRecord.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
@@ -172,8 +174,8 @@ class EntryRecordServiceTest {
     void registerEntryWithBikeRegistrationSuccess() {
         when(parkingLotRepository.findById(1L)).thenReturn(Optional.of(parkingLot));
         when(vehicleRepository.findByBikeRegistration("BIKE-001")).thenReturn(Optional.of(bike));
-        when(cellRepository.findFirstByParkingLotAndVehicleTypeAndStatus(
-                parkingLot, bike.getVehicleType(), "available"))
+        when(cellRepository.findFirstByParkingLotAndVehicleTypeAndStatusAndReservedForStaff(
+                parkingLot, bike.getVehicleType(), "available", false))
                 .thenReturn(Optional.of(availableCell));
         when(entryRecordRepository.save(any(EntryRecord.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
@@ -197,8 +199,8 @@ class EntryRecordServiceTest {
         when(parkingLotRepository.findById(1L)).thenReturn(Optional.of(parkingLot));
         when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
         when(userRepository.findByUsername("lgomez")).thenReturn(Optional.of(staffUser));
-        when(cellRepository.findFirstByParkingLotAndVehicleTypeAndStatus(
-                parkingLot, carType, "available"))
+        when(cellRepository.findFirstByParkingLotAndVehicleTypeAndStatusAndReservedForStaff(
+                parkingLot, carType, "available", false))
                 .thenReturn(Optional.of(availableCell));
         when(entryRecordRepository.save(any(EntryRecord.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
@@ -212,8 +214,63 @@ class EntryRecordServiceTest {
     }
 
     @Test
-    @DisplayName("Register exit assigns recordedBy, creates payment, and returns exit response")
-    void registerExitSetsRecordedBy() {
+    @DisplayName("Register exit with paymentMethod creates Payment with method set")
+    void registerExitWithPaymentMethod() {
+        parkingLot.setAutoAssignment(true);
+
+        EntryRecord activeRecord = new EntryRecord();
+        activeRecord.setId(1L);
+        activeRecord.setVehicle(car);
+        activeRecord.setCell(availableCell);
+        activeRecord.setEntryTime(java.time.LocalDateTime.now().minusHours(2));
+        activeRecord.setStatus("active");
+
+        Rate rate = new Rate();
+        rate.setId(1L);
+        rate.setParkingLot(parkingLot);
+        rate.setVehicleType(carType);
+        rate.setRateType("flat");
+        rate.setCost(new BigDecimal("50"));
+        rate.setActive(true);
+
+        exitRequest.setPaymentMethod("CASH");
+
+        when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
+        when(entryRecordRepository.findByVehicleAndStatus(car, "active"))
+                .thenReturn(Optional.of(activeRecord));
+        when(userRepository.findByUsername("lgomez")).thenReturn(Optional.of(staffUser));
+        when(rateRepository.findByParkingLotAndVehicleTypeAndActive(parkingLot, carType, true))
+                .thenReturn(Optional.of(rate));
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        var response = entryRecordService.registerExit(exitRequest);
+
+        assertNotNull(response);
+        assertEquals(1L, response.getEntryRecordId());
+        assertEquals("ABC-123", response.getPlate());
+        assertEquals("car", response.getVehicleType());
+        assertNotNull(response.getExitTime());
+        assertNotNull(response.getDuration());
+        assertTrue(response.getDuration() > 0);
+        assertEquals(new BigDecimal("50"), response.getSubtotal());
+        assertEquals(BigDecimal.ZERO, response.getDiscountAmount());
+        assertEquals(new BigDecimal("50"), response.getTotalPaid());
+
+        ArgumentCaptor<Payment> paymentCaptor = ArgumentCaptor.forClass(Payment.class);
+        verify(paymentRepository, times(1)).save(paymentCaptor.capture());
+        assertEquals("CASH", paymentCaptor.getValue().getPaymentMethod());
+
+        verify(entryRecordRepository, times(1)).save(argThat(r ->
+                "completed".equals(r.getStatus())
+                        && r.getRecordedBy() != null
+                        && "lgomez".equals(r.getRecordedBy().getUsername())
+        ));
+        verify(userRepository, times(1)).findByUsername("lgomez");
+    }
+
+    @Test
+    @DisplayName("Register exit without paymentMethod saves Payment with null method")
+    void registerExitWithoutPaymentMethod() {
         EntryRecord activeRecord = new EntryRecord();
         activeRecord.setId(1L);
         activeRecord.setVehicle(car);
@@ -240,23 +297,11 @@ class EntryRecordServiceTest {
         var response = entryRecordService.registerExit(exitRequest);
 
         assertNotNull(response);
-        assertEquals(1L, response.getEntryRecordId());
-        assertEquals("ABC-123", response.getPlate());
-        assertEquals("car", response.getVehicleType());
-        assertNotNull(response.getExitTime());
-        assertNotNull(response.getDuration());
-        assertTrue(response.getDuration() > 0);
-        assertEquals(new BigDecimal("50"), response.getSubtotal());
-        assertEquals(BigDecimal.ZERO, response.getDiscountAmount());
         assertEquals(new BigDecimal("50"), response.getTotalPaid());
 
-        verify(entryRecordRepository, times(1)).save(argThat(r ->
-                "completed".equals(r.getStatus())
-                        && r.getRecordedBy() != null
-                        && "lgomez".equals(r.getRecordedBy().getUsername())
-        ));
-        verify(userRepository, times(1)).findByUsername("lgomez");
-        verify(paymentRepository, times(1)).save(any(Payment.class));
+        ArgumentCaptor<Payment> paymentCaptor = ArgumentCaptor.forClass(Payment.class);
+        verify(paymentRepository, times(1)).save(paymentCaptor.capture());
+        assertNull(paymentCaptor.getValue().getPaymentMethod());
     }
 
     @Test
@@ -273,7 +318,166 @@ class EntryRecordServiceTest {
         );
 
         assertEquals("Vehicle already inside parking lot", exception.getMessage());
-        verify(cellRepository, never()).findFirstByParkingLotAndVehicleTypeAndStatus(any(), any(), any());
+        verify(cellRepository, never()).findFirstByParkingLotAndVehicleTypeAndStatusAndReservedForStaff(any(), any(), any(), any());
         verify(entryRecordRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Manual cell assignment succeeds when autoAssignment is disabled and cellId is valid")
+    void manualCellAssignmentSuccess() {
+        parkingLot.setAutoAssignment(false);
+        availableCell.setCellType("parking");
+        availableCell.setVehicleType(carType);
+
+        plateRequest.setCellId(10L);
+
+        when(parkingLotRepository.findById(1L)).thenReturn(Optional.of(parkingLot));
+        when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
+        when(userRepository.findByUsername("lgomez")).thenReturn(Optional.of(staffUser));
+        when(cellRepository.findByIdAndParkingLot(10L, parkingLot)).thenReturn(Optional.of(availableCell));
+        when(entryRecordRepository.save(any(EntryRecord.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        EntryRecord result = entryRecordService.registerEntry(plateRequest);
+
+        assertNotNull(result);
+        assertEquals(car, result.getVehicle());
+        assertEquals(availableCell, result.getCell());
+        assertEquals("active", result.getStatus());
+
+        verify(cellRepository, times(1)).save(availableCell);
+        assertEquals("occupied", availableCell.getStatus());
+        verify(cellRepository, never()).findFirstByParkingLotAndVehicleTypeAndStatusAndReservedForStaff(any(), any(), any(), any());
+    }
+
+    @Test
+    @DisplayName("Manual cell assignment throws when autoAssignment disabled and no cellId provided")
+    void manualCellAssignmentMissingCellId() {
+        parkingLot.setAutoAssignment(false);
+
+        when(parkingLotRepository.findById(1L)).thenReturn(Optional.of(parkingLot));
+        when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
+        when(entryRecordRepository.findByVehicleAndStatus(car, "active"))
+                .thenReturn(Optional.empty());
+
+        RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> entryRecordService.registerEntry(plateRequest)
+        );
+
+        assertEquals("Auto-assignment is disabled. A cellId is required.", exception.getMessage());
+        verify(cellRepository, never()).findByIdAndParkingLot(any(), any());
+    }
+
+    @Test
+    @DisplayName("Manual cell assignment throws when cell not found in parking lot")
+    void manualCellAssignmentCellNotFound() {
+        parkingLot.setAutoAssignment(false);
+        plateRequest.setCellId(99L);
+
+        when(parkingLotRepository.findById(1L)).thenReturn(Optional.of(parkingLot));
+        when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
+        when(entryRecordRepository.findByVehicleAndStatus(car, "active"))
+                .thenReturn(Optional.empty());
+        when(cellRepository.findByIdAndParkingLot(99L, parkingLot)).thenReturn(Optional.empty());
+
+        RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> entryRecordService.registerEntry(plateRequest)
+        );
+
+        assertEquals("Cell not found in this parking lot", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Manual cell assignment throws when cell is occupied")
+    void manualCellAssignmentOccupied() {
+        parkingLot.setAutoAssignment(false);
+        availableCell.setCellType("parking");
+        availableCell.setVehicleType(carType);
+        availableCell.setStatus("occupied");
+        plateRequest.setCellId(10L);
+
+        when(parkingLotRepository.findById(1L)).thenReturn(Optional.of(parkingLot));
+        when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
+        when(entryRecordRepository.findByVehicleAndStatus(car, "active"))
+                .thenReturn(Optional.empty());
+        when(cellRepository.findByIdAndParkingLot(10L, parkingLot)).thenReturn(Optional.of(availableCell));
+
+        RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> entryRecordService.registerEntry(plateRequest)
+        );
+
+        assertEquals("Selected cell is not available", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Manual cell assignment throws when cell is transit type")
+    void manualCellAssignmentTransitCell() {
+        parkingLot.setAutoAssignment(false);
+        availableCell.setCellType("transit");
+        availableCell.setStatus("available");
+        plateRequest.setCellId(10L);
+
+        when(parkingLotRepository.findById(1L)).thenReturn(Optional.of(parkingLot));
+        when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
+        when(entryRecordRepository.findByVehicleAndStatus(car, "active"))
+                .thenReturn(Optional.empty());
+        when(cellRepository.findByIdAndParkingLot(10L, parkingLot)).thenReturn(Optional.of(availableCell));
+
+        RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> entryRecordService.registerEntry(plateRequest)
+        );
+
+        assertEquals("Selected cell is not a parking cell", exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("Manual cell assignment throws when cell does not support vehicle type")
+    void manualCellAssignmentWrongVehicleType() {
+        parkingLot.setAutoAssignment(false);
+        availableCell.setCellType("parking");
+        availableCell.setStatus("available");
+        VehicleType motorcycleType = new VehicleType();
+        motorcycleType.setId(3L);
+        motorcycleType.setName("motorcycle");
+        availableCell.setVehicleType(motorcycleType);
+        plateRequest.setCellId(10L);
+
+        when(parkingLotRepository.findById(1L)).thenReturn(Optional.of(parkingLot));
+        when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
+        when(entryRecordRepository.findByVehicleAndStatus(car, "active"))
+                .thenReturn(Optional.empty());
+        when(cellRepository.findByIdAndParkingLot(10L, parkingLot)).thenReturn(Optional.of(availableCell));
+
+        RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> entryRecordService.registerEntry(plateRequest)
+        );
+
+        assertTrue(exception.getMessage().contains("does not support vehicle type"));
+    }
+
+    @Test
+    @DisplayName("Auto-assignment excludes reserved for staff cells")
+    void autoAssignmentExcludesStaffCells() {
+        when(parkingLotRepository.findById(1L)).thenReturn(Optional.of(parkingLot));
+        when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
+        when(userRepository.findByUsername("lgomez")).thenReturn(Optional.of(staffUser));
+        when(cellRepository.findFirstByParkingLotAndVehicleTypeAndStatusAndReservedForStaff(
+                parkingLot, carType, "available", false))
+                .thenReturn(Optional.of(availableCell));
+        when(entryRecordRepository.save(any(EntryRecord.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        EntryRecord result = entryRecordService.registerEntry(plateRequest);
+
+        assertNotNull(result);
+        assertEquals(availableCell, result.getCell());
+
+        verify(cellRepository).findFirstByParkingLotAndVehicleTypeAndStatusAndReservedForStaff(
+                parkingLot, carType, "available", false);
     }
 }

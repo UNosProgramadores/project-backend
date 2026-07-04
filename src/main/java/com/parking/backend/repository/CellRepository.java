@@ -17,4 +17,13 @@ public interface CellRepository extends JpaRepository<Cell, Long> {
     );
 
     List<Cell> findByParkingLot(ParkingLot parkingLot);
+
+    Optional<Cell> findFirstByParkingLotAndVehicleTypeAndStatusAndReservedForStaff(
+            ParkingLot parkingLot,
+            VehicleType vehicleType,
+            String status,
+            Boolean reservedForStaff
+    );
+
+    Optional<Cell> findByIdAndParkingLot(Long id, ParkingLot parkingLot);
 }

@@ -6,6 +6,7 @@ public class VehicleEntryRequest {
     private Long vehicleTypeId;
     private String plate;
     private String bikeRegistration;
+    private Long cellId;
 
     public Long getParkingLotId() {
         return parkingLotId;
@@ -37,5 +38,13 @@ public class VehicleEntryRequest {
 
     public void setBikeRegistration(String bikeRegistration) {
         this.bikeRegistration = bikeRegistration;
+    }
+
+    public Long getCellId() {
+        return cellId;
+    }
+
+    public void setCellId(Long cellId) {
+        this.cellId = cellId;
     }
 }
