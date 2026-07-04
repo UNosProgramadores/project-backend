@@ -36,9 +36,16 @@ class CellServiceTest {
     @InjectMocks
     private CellService cellService;
 
-    private Cell buildCell(Long id, String cellType) {
+    private ParkingLot buildLot() {
+        ParkingLot lot = new ParkingLot();
+        lot.setId(1L);
+        return lot;
+    }
+
+    private Cell buildCell(Long id, String cellType, ParkingLot lot) {
         Cell cell = new Cell();
         cell.setId(id);
+        cell.setParkingLot(lot);
         cell.setRow(1);
         cell.setCol(1);
         cell.setCode("1-1");
@@ -50,11 +57,12 @@ class CellServiceTest {
     @Test
     @DisplayName("updateCellType sets cellType to parking")
     void setParkingType() {
-        Cell cell = buildCell(1L, "transit");
+        ParkingLot lot = buildLot();
+        Cell cell = buildCell(1L, "transit", lot);
         when(cellRepository.findById(1L)).thenReturn(Optional.of(cell));
         when(cellRepository.save(any(Cell.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Cell result = cellService.updateCellType(1L, "parking");
+        Cell result = cellService.updateCellType(1L, "parking", 1L);
 
         assertEquals("parking", result.getCellType());
         verify(cellRepository, times(1)).save(cell);
@@ -63,12 +71,13 @@ class CellServiceTest {
     @Test
     @DisplayName("updateCellType to transit clears vehicleType")
     void setTransitClearsVehicleType() {
-        Cell cell = buildCell(1L, "parking");
+        ParkingLot lot = buildLot();
+        Cell cell = buildCell(1L, "parking", lot);
         cell.setVehicleType(new VehicleType());
         when(cellRepository.findById(1L)).thenReturn(Optional.of(cell));
         when(cellRepository.save(any(Cell.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Cell result = cellService.updateCellType(1L, "transit");
+        Cell result = cellService.updateCellType(1L, "transit", 1L);
 
         assertEquals("transit", result.getCellType());
         assertNull(result.getVehicleType());
@@ -78,7 +87,7 @@ class CellServiceTest {
     @DisplayName("updateCellType throws for invalid type")
     void invalidCellTypeThrows() {
         RuntimeException ex = assertThrows(RuntimeException.class,
-                () -> cellService.updateCellType(1L, "invalid"));
+                () -> cellService.updateCellType(1L, "invalid", 1L));
 
         assertTrue(ex.getMessage().contains("parking"));
     }
@@ -86,7 +95,8 @@ class CellServiceTest {
     @Test
     @DisplayName("updateVehicleType sets vehicleType on parking cell")
     void setVehicleTypeOnParkingCell() {
-        Cell cell = buildCell(1L, "parking");
+        ParkingLot lot = buildLot();
+        Cell cell = buildCell(1L, "parking", lot);
         VehicleType vt = new VehicleType();
         vt.setId(1L);
         vt.setName("car");
@@ -95,7 +105,7 @@ class CellServiceTest {
         when(vehicleTypeRepository.findById(1L)).thenReturn(Optional.of(vt));
         when(cellRepository.save(any(Cell.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Cell result = cellService.updateVehicleType(1L, 1L);
+        Cell result = cellService.updateVehicleType(1L, 1L, 1L);
 
         assertNotNull(result.getVehicleType());
         assertEquals(1L, result.getVehicleType().getId());
@@ -104,11 +114,12 @@ class CellServiceTest {
     @Test
     @DisplayName("updateVehicleType throws on transit cell")
     void setVehicleTypeOnTransitCellThrows() {
-        Cell cell = buildCell(1L, "transit");
+        ParkingLot lot = buildLot();
+        Cell cell = buildCell(1L, "transit", lot);
         when(cellRepository.findById(1L)).thenReturn(Optional.of(cell));
 
         RuntimeException ex = assertThrows(RuntimeException.class,
-                () -> cellService.updateVehicleType(1L, 1L));
+                () -> cellService.updateVehicleType(1L, 1L, 1L));
 
         assertTrue(ex.getMessage().contains("parking"));
     }
@@ -116,14 +127,45 @@ class CellServiceTest {
     @Test
     @DisplayName("updateVehicleType throws when vehicleType not found")
     void setVehicleTypeNotFoundThrows() {
-        Cell cell = buildCell(1L, "parking");
+        ParkingLot lot = buildLot();
+        Cell cell = buildCell(1L, "parking", lot);
         when(cellRepository.findById(1L)).thenReturn(Optional.of(cell));
         when(vehicleTypeRepository.findById(99L)).thenReturn(Optional.empty());
 
         RuntimeException ex = assertThrows(RuntimeException.class,
-                () -> cellService.updateVehicleType(1L, 99L));
+                () -> cellService.updateVehicleType(1L, 99L, 1L));
 
         assertTrue(ex.getMessage().contains("99"));
+    }
+
+    @Test
+    @DisplayName("updateCellType throws when cell belongs to different parking lot")
+    void updateCellTypeWithWrongParkingLotThrows() {
+        ParkingLot lotA = new ParkingLot();
+        lotA.setId(1L);
+        Cell cell = buildCell(1L, "transit", lotA);
+        when(cellRepository.findById(1L)).thenReturn(Optional.of(cell));
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> cellService.updateCellType(1L, "parking", 99L));
+
+        assertTrue(ex.getMessage().contains("no pertenece"));
+        verify(cellRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("updateVehicleType throws when cell belongs to different parking lot")
+    void updateVehicleTypeWithWrongParkingLotThrows() {
+        ParkingLot lotA = new ParkingLot();
+        lotA.setId(1L);
+        Cell cell = buildCell(1L, "parking", lotA);
+        when(cellRepository.findById(1L)).thenReturn(Optional.of(cell));
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> cellService.updateVehicleType(1L, 1L, 99L));
+
+        assertTrue(ex.getMessage().contains("no pertenece"));
+        verify(cellRepository, never()).save(any());
     }
 
     private ParkingLot buildLot(int rows, int cols) {

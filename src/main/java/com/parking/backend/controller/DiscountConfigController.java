@@ -26,7 +26,7 @@ public class DiscountConfigController {
 
     @GetMapping("/config/{id}")
     public ResponseEntity<DiscountConfig> getConfig(@PathVariable Long parkingLotId, @PathVariable Long id) {
-        return ResponseEntity.ok(discountConfigService.getById(id));
+        return ResponseEntity.ok(discountConfigService.getById(id, parkingLotId));
     }
 
     @PostMapping("/config")
@@ -41,12 +41,12 @@ public class DiscountConfigController {
             @PathVariable Long parkingLotId,
             @PathVariable Long id,
             @RequestBody DiscountConfigRequest request) {
-        return ResponseEntity.ok(discountConfigService.update(id, request));
+        return ResponseEntity.ok(discountConfigService.update(id, parkingLotId, request));
     }
 
     @DeleteMapping("/config/{id}")
     public ResponseEntity<Void> deleteConfig(@PathVariable Long parkingLotId, @PathVariable Long id) {
-        discountConfigService.delete(id);
+        discountConfigService.delete(id, parkingLotId);
         return ResponseEntity.noContent().build();
     }
 }

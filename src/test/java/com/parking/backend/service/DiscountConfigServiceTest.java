@@ -78,7 +78,7 @@ class DiscountConfigServiceTest {
         DiscountConfig config = buildConfig(1L, lot);
         when(repository.findById(1L)).thenReturn(Optional.of(config));
 
-        DiscountConfig result = discountConfigService.getById(1L);
+        DiscountConfig result = discountConfigService.getById(1L, 1L);
 
         assertNotNull(result);
         assertEquals(1L, result.getId());
@@ -90,9 +90,23 @@ class DiscountConfigServiceTest {
         when(repository.findById(99L)).thenReturn(Optional.empty());
 
         RuntimeException ex = assertThrows(RuntimeException.class,
-                () -> discountConfigService.getById(99L));
+                () -> discountConfigService.getById(99L, 1L));
 
         assertTrue(ex.getMessage().contains("99"));
+    }
+
+    @Test
+    @DisplayName("getById throws when config belongs to different parking lot")
+    void getByIdWithWrongParkingLotThrows() {
+        ParkingLot lotA = buildLot(1L);
+        ParkingLot lotB = buildLot(99L);
+        DiscountConfig config = buildConfig(1L, lotA);
+        when(repository.findById(1L)).thenReturn(Optional.of(config));
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> discountConfigService.getById(1L, 99L));
+
+        assertTrue(ex.getMessage().contains("no pertenece"));
     }
 
     @Test
@@ -128,7 +142,7 @@ class DiscountConfigServiceTest {
         when(repository.findById(1L)).thenReturn(Optional.of(existing));
         when(repository.save(any(DiscountConfig.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        DiscountConfig result = discountConfigService.update(1L, req);
+        DiscountConfig result = discountConfigService.update(1L, 1L, req);
 
         assertFalse(existing.getActive(), "Old record should be inactive");
         assertNotNull(existing.getEndDate(), "Old record should have end date");
@@ -143,22 +157,54 @@ class DiscountConfigServiceTest {
     @Test
     @DisplayName("delete removes config when exists")
     void deleteSuccess() {
-        when(repository.existsById(1L)).thenReturn(true);
+        ParkingLot lot = buildLot(1L);
+        DiscountConfig config = buildConfig(1L, lot);
+        when(repository.findById(1L)).thenReturn(Optional.of(config));
 
-        assertDoesNotThrow(() -> discountConfigService.delete(1L));
-        verify(repository, times(1)).deleteById(1L);
+        assertDoesNotThrow(() -> discountConfigService.delete(1L, 1L));
+        verify(repository, times(1)).delete(config);
     }
 
     @Test
     @DisplayName("delete throws when config not found")
     void deleteThrowsWhenNotFound() {
-        when(repository.existsById(99L)).thenReturn(false);
+        when(repository.findById(99L)).thenReturn(Optional.empty());
 
         RuntimeException ex = assertThrows(RuntimeException.class,
-                () -> discountConfigService.delete(99L));
+                () -> discountConfigService.delete(99L, 1L));
 
-        assertTrue(ex.getMessage().contains("eliminar"));
-        verify(repository, never()).deleteById(any());
+        assertTrue(ex.getMessage().contains("99"));
+    }
+
+    @Test
+    @DisplayName("update throws when config belongs to different parking lot")
+    void updateWithWrongParkingLotThrows() {
+        ParkingLot lotA = buildLot(1L);
+        ParkingLot lotB = buildLot(99L);
+        DiscountConfig config = buildConfig(1L, lotA);
+        DiscountConfigRequest req = buildRequest();
+
+        when(repository.findById(1L)).thenReturn(Optional.of(config));
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> discountConfigService.update(1L, 99L, req));
+
+        assertTrue(ex.getMessage().contains("no pertenece"));
+        verify(repository, never()).save(any(DiscountConfig.class));
+    }
+
+    @Test
+    @DisplayName("delete throws when config belongs to different parking lot")
+    void deleteWithWrongParkingLotThrows() {
+        ParkingLot lotA = buildLot(1L);
+        DiscountConfig config = buildConfig(1L, lotA);
+        when(repository.findById(1L)).thenReturn(Optional.of(config));
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> discountConfigService.delete(1L, 99L));
+
+        assertTrue(ex.getMessage().contains("no pertenece"));
+        verify(repository, never()).delete(any());
     }
 
     @Test

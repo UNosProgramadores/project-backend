@@ -32,9 +32,13 @@ public class RateService {
         return repository.findByParkingLot(lot);
     }
 
-    public Rate getById(Long id) {
-        return repository.findById(id)
+    public Rate getById(Long id, Long parkingLotId) {
+        Rate rate = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Tarifa no encontrada con ID: " + id));
+        if (!rate.getParkingLot().getId().equals(parkingLotId)) {
+            throw new RuntimeException("La tarifa no pertenece a este parqueadero");
+        }
+        return rate;
     }
 
     @Transactional
@@ -47,8 +51,8 @@ public class RateService {
     }
 
     @Transactional
-    public Rate update(Long id, RateRequest request) {
-        Rate existing = getById(id);
+    public Rate update(Long id, Long parkingLotId, RateRequest request) {
+        Rate existing = getById(id, parkingLotId);
         // RF_08: close the active record and create a new one
         existing.setActive(false);
         existing.setEndDate(LocalDateTime.now());
@@ -61,11 +65,9 @@ public class RateService {
     }
 
     @Transactional
-    public void delete(Long id) {
-        if (!repository.existsById(id)) {
-            throw new RuntimeException("No se puede eliminar: Tarifa no encontrada con ID: " + id);
-        }
-        repository.deleteById(id);
+    public void delete(Long id, Long parkingLotId) {
+        Rate rate = getById(id, parkingLotId);
+        repository.delete(rate);
     }
 
     private void applyRequest(Rate entity, RateRequest request, ParkingLot lot) {
