@@ -2,9 +2,18 @@ package com.parking.backend.dto;
 
 public class VehicleExitRequest {
 
+    private Long parkingLotId;
     private String plate;
     private String bikeRegistration;
     private String paymentMethod;
+
+    public Long getParkingLotId() {
+        return parkingLotId;
+    }
+
+    public void setParkingLotId(Long parkingLotId) {
+        this.parkingLotId = parkingLotId;
+    }
 
     public String getPlate() {
         return plate;
