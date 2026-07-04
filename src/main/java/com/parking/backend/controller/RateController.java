@@ -26,7 +26,7 @@ public class RateController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Rate> getRate(@PathVariable Long parkingLotId, @PathVariable Long id) {
-        return ResponseEntity.ok(rateService.getById(id));
+        return ResponseEntity.ok(rateService.getById(id, parkingLotId));
     }
 
     @PostMapping
@@ -41,12 +41,12 @@ public class RateController {
             @PathVariable Long parkingLotId,
             @PathVariable Long id,
             @RequestBody RateRequest request) {
-        return ResponseEntity.ok(rateService.update(id, request));
+        return ResponseEntity.ok(rateService.update(id, parkingLotId, request));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRate(@PathVariable Long parkingLotId, @PathVariable Long id) {
-        rateService.delete(id);
+        rateService.delete(id, parkingLotId);
         return ResponseEntity.noContent().build();
     }
 }

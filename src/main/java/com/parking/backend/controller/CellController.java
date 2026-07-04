@@ -33,7 +33,7 @@ public class CellController {
             @PathVariable Long cellId,
             @RequestBody CellTypeRequest request) {
         try {
-            Cell cell = cellService.updateCellType(cellId, request.getCellType());
+            Cell cell = cellService.updateCellType(cellId, request.getCellType(), parkingLotId);
             return ResponseEntity.ok(cell);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -46,7 +46,7 @@ public class CellController {
             @PathVariable Long cellId,
             @RequestBody CellVehicleTypeRequest request) {
         try {
-            Cell cell = cellService.updateVehicleType(cellId, request.getVehicleTypeId());
+            Cell cell = cellService.updateVehicleType(cellId, request.getVehicleTypeId(), parkingLotId);
             return ResponseEntity.ok(cell);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
