@@ -12,8 +12,6 @@ public class CellDto {
     private String vehicleTypeName;
     private Boolean reservedForStaff;
 
-    public CellDto() {}
-
     public CellDto(Long id, Integer row, Integer col, String code, String cellType,
                    String status, Long vehicleTypeId, String vehicleTypeName,
                    Boolean reservedForStaff) {
