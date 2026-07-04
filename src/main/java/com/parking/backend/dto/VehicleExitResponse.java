@@ -17,6 +17,8 @@ public class VehicleExitResponse {
     private BigDecimal discountPercentage;
     private BigDecimal discountAmount;
     private BigDecimal totalPaid;
+    private String paymentMethod;
+    private Long invoiceId;
 
     public Long getEntryRecordId() { return entryRecordId; }
     public void setEntryRecordId(Long entryRecordId) { this.entryRecordId = entryRecordId; }
@@ -42,4 +44,8 @@ public class VehicleExitResponse {
     public void setDiscountAmount(BigDecimal discountAmount) { this.discountAmount = discountAmount; }
     public BigDecimal getTotalPaid() { return totalPaid; }
     public void setTotalPaid(BigDecimal totalPaid) { this.totalPaid = totalPaid; }
+    public String getPaymentMethod() { return paymentMethod; }
+    public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
+    public Long getInvoiceId() { return invoiceId; }
+    public void setInvoiceId(Long invoiceId) { this.invoiceId = invoiceId; }
 }
