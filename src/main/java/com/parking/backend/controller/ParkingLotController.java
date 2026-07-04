@@ -1,11 +1,13 @@
 package com.parking.backend.controller;
 
 import com.parking.backend.dto.ParkingLotRequest;
+import com.parking.backend.dto.ParkingMapResponse;
 import com.parking.backend.dto.VehicleEntryRequest;
 import com.parking.backend.dto.VehicleExitRequest;
 import com.parking.backend.dto.VehicleExitResponse;
 import com.parking.backend.entity.EntryRecord;
 import com.parking.backend.entity.ParkingLot;
+import com.parking.backend.service.CellService;
 import com.parking.backend.service.EntryRecordService;
 import com.parking.backend.service.ParkingLotService;
 import jakarta.validation.Valid;
@@ -21,11 +23,14 @@ public class ParkingLotController {
 
     private final ParkingLotService parkingLotService;
     private final EntryRecordService entryRecordService;
+    private final CellService cellService;
 
     public ParkingLotController(ParkingLotService parkingLotService,
-                                EntryRecordService entryRecordService) {
+                                EntryRecordService entryRecordService,
+                                CellService cellService) {
         this.parkingLotService = parkingLotService;
         this.entryRecordService = entryRecordService;
+        this.cellService = cellService;
     }
 
     @GetMapping
@@ -36,6 +41,15 @@ public class ParkingLotController {
     @GetMapping("/{id}")
     public ResponseEntity<ParkingLot> getById(@PathVariable Long id) {
         return ResponseEntity.ok(parkingLotService.getById(id));
+    }
+
+    @GetMapping("/{parkingLotId}/map")
+    public ResponseEntity<?> getMap(@PathVariable Long parkingLotId) {
+        try {
+            return ResponseEntity.ok(cellService.getMap(parkingLotId));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @PostMapping
