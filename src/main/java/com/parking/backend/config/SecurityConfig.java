@@ -34,6 +34,9 @@ public class SecurityConfig {
 
                         .requestMatchers("/api/auth/**").permitAll()
 
+                        .requestMatchers("/api/staff/**").hasRole("ADMIN")
+                        .requestMatchers("/api/vehicles/**").hasRole("CUSTOMER")
+
                         .requestMatchers("/api/parking-lots/*/config").hasRole("ADMIN")
                         .requestMatchers("/api/parking-lots/*/staff/**").hasRole("ADMIN")
                         .requestMatchers("/api/parking-lots/*/rates/**").hasRole("ADMIN")

@@ -40,6 +40,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -650,5 +651,73 @@ class EntryRecordServiceTest {
                 "card".equals(p.getPaymentMethod())
         ));
         verify(invoiceRepository, times(1)).save(any(Invoice.class));
+    }
+
+    @Test
+    @DisplayName("H-07: Register exit with vehicle owned by customer applies discount correctly")
+    void registerExitWithVehicleOwnerAppliesDiscount() {
+        User customerOwner = new User();
+        customerOwner.setId(50L);
+        customerOwner.setUsername("customer1");
+
+        Vehicle ownedCar = new Vehicle();
+        ownedCar.setId(100L);
+        ownedCar.setPlate("OWNED-01");
+        ownedCar.setVehicleType(carType);
+        ownedCar.setOwner(customerOwner);
+
+        Cell ownedCell = new Cell();
+        ownedCell.setId(30L);
+        ownedCell.setParkingLot(parkingLot);
+        ownedCell.setVehicleType(carType);
+        ownedCell.setStatus("occupied");
+
+        EntryRecord activeRecord = new EntryRecord();
+        activeRecord.setId(50L);
+        activeRecord.setVehicle(ownedCar);
+        activeRecord.setCell(ownedCell);
+        activeRecord.setEntryTime(java.time.LocalDateTime.now().minusHours(3));
+        activeRecord.setStatus("active");
+
+        Rate rate = new Rate();
+        rate.setId(5L);
+        rate.setParkingLot(parkingLot);
+        rate.setVehicleType(carType);
+        rate.setRateType("per_minute");
+        rate.setCost(new BigDecimal("2"));
+        rate.setActive(true);
+
+        VehicleExitRequest exitReq = new VehicleExitRequest();
+        exitReq.setPlate("OWNED-01");
+        exitReq.setParkingLotId(1L);
+        exitReq.setPaymentMethod("cash");
+
+        when(vehicleRepository.findByPlate("OWNED-01")).thenReturn(Optional.of(ownedCar));
+        when(entryRecordRepository.findByVehicleAndStatus(ownedCar, "active"))
+                .thenReturn(Optional.of(activeRecord));
+        when(userRepository.findByUsername("lgomez")).thenReturn(Optional.of(staffUser));
+        when(rateRepository.findByParkingLotAndVehicleTypeAndActive(parkingLot, carType, true))
+                .thenReturn(Optional.of(rate));
+        when(discountService.calculateDiscount(eq(parkingLot), eq(customerOwner), any()))
+                .thenReturn(new BigDecimal("36"));
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(invoiceRepository.save(any(Invoice.class))).thenAnswer(inv -> {
+            Invoice invEntity = inv.getArgument(0);
+            invEntity.setId(500L);
+            return invEntity;
+        });
+
+        var response = entryRecordService.registerExit(exitReq);
+
+        assertNotNull(response);
+        assertEquals("OWNED-01", response.getPlate());
+        assertEquals(180, response.getDuration());
+        assertEquals(new BigDecimal("360"), response.getSubtotal());
+        assertEquals(new BigDecimal("36"), response.getDiscountAmount());
+        assertEquals(new BigDecimal("324"), response.getTotalPaid());
+        assertEquals(new BigDecimal("10"), response.getDiscountPercentage());
+        assertEquals(500L, response.getInvoiceId());
+
+        verify(discountService, times(1)).calculateDiscount(eq(parkingLot), eq(customerOwner), any());
     }
 }
