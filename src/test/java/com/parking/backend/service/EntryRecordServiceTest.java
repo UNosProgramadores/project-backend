@@ -654,6 +654,26 @@ class EntryRecordServiceTest {
     }
 
     @Test
+    @DisplayName("registerEntry rolls back when entryRecordRepository.save fails (transactional)")
+    void registerEntryTransactionalRollbackOnSaveFailure() {
+        when(parkingLotRepository.findById(1L)).thenReturn(Optional.of(parkingLot));
+        when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
+        when(userRepository.findByUsername("lgomez")).thenReturn(Optional.of(staffUser));
+        when(cellRepository.findFirstByParkingLotAndVehicleTypeAndStatusAndReservedForStaff(
+                parkingLot, carType, "available", false))
+                .thenReturn(Optional.of(availableCell));
+        when(entryRecordRepository.save(any(EntryRecord.class)))
+                .thenThrow(new RuntimeException("DB failure"));
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> entryRecordService.registerEntry(plateRequest));
+
+        assertTrue(ex.getMessage().contains("DB failure"));
+        verify(cellRepository, times(1)).save(availableCell);
+        verify(entryRecordRepository, times(1)).save(any(EntryRecord.class));
+    }
+
+    @Test
     @DisplayName("H-07: Register exit with vehicle owned by customer applies discount correctly")
     void registerExitWithVehicleOwnerAppliesDiscount() {
         User customerOwner = new User();

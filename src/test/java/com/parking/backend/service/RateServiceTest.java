@@ -102,7 +102,7 @@ class RateServiceTest {
         when(vehicleTypeRepository.findById(1L)).thenReturn(Optional.of(vt));
         when(repository.save(any(Rate.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        Rate result = rateService.update(1L, req);
+        Rate result = rateService.update(1L, 1L, req);
 
         assertFalse(existing.getActive(), "Old record should be inactive");
         assertNotNull(existing.getEndDate(), "Old record should have end date");
@@ -117,22 +117,24 @@ class RateServiceTest {
     @Test
     @DisplayName("delete removes rate when exists")
     void deleteSuccess() {
-        when(repository.existsById(1L)).thenReturn(true);
+        ParkingLot lot = buildLot();
+        VehicleType vt = buildVehicleType();
+        Rate rate = buildRate(1L, lot, vt);
+        when(repository.findById(1L)).thenReturn(Optional.of(rate));
 
-        assertDoesNotThrow(() -> rateService.delete(1L));
-        verify(repository, times(1)).deleteById(1L);
+        assertDoesNotThrow(() -> rateService.delete(1L, 1L));
+        verify(repository, times(1)).delete(rate);
     }
 
     @Test
     @DisplayName("delete throws when rate not found")
     void deleteThrowsWhenNotFound() {
-        when(repository.existsById(99L)).thenReturn(false);
+        when(repository.findById(99L)).thenReturn(Optional.empty());
 
         RuntimeException ex = assertThrows(RuntimeException.class,
-                () -> rateService.delete(99L));
+                () -> rateService.delete(99L, 1L));
 
-        assertTrue(ex.getMessage().contains("eliminar"));
-        verify(repository, never()).deleteById(any());
+        assertTrue(ex.getMessage().contains("99"));
     }
 
     @Test
@@ -143,7 +145,7 @@ class RateServiceTest {
         Rate rate = buildRate(1L, lot, vt);
         when(repository.findById(1L)).thenReturn(Optional.of(rate));
 
-        Rate result = rateService.getById(1L);
+        Rate result = rateService.getById(1L, 1L);
 
         assertNotNull(result);
         assertEquals(1L, result.getId());
@@ -155,8 +157,59 @@ class RateServiceTest {
         when(repository.findById(99L)).thenReturn(Optional.empty());
 
         RuntimeException ex = assertThrows(RuntimeException.class,
-                () -> rateService.getById(99L));
+                () -> rateService.getById(99L, 1L));
 
         assertTrue(ex.getMessage().contains("99"));
+    }
+
+    @Test
+    @DisplayName("getById throws when rate belongs to different parking lot")
+    void getByIdWithWrongParkingLotThrows() {
+        ParkingLot lotA = new ParkingLot();
+        lotA.setId(1L);
+        ParkingLot lotB = new ParkingLot();
+        lotB.setId(99L);
+        VehicleType vt = buildVehicleType();
+        Rate rate = buildRate(1L, lotA, vt);
+        when(repository.findById(1L)).thenReturn(Optional.of(rate));
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> rateService.getById(1L, 99L));
+
+        assertTrue(ex.getMessage().contains("no pertenece"));
+    }
+
+    @Test
+    @DisplayName("update throws when rate belongs to different parking lot")
+    void updateWithWrongParkingLotThrows() {
+        ParkingLot lotA = new ParkingLot();
+        lotA.setId(1L);
+        VehicleType vt = buildVehicleType();
+        Rate rate = buildRate(1L, lotA, vt);
+        RateRequest req = buildRequest();
+
+        when(repository.findById(1L)).thenReturn(Optional.of(rate));
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> rateService.update(1L, 99L, req));
+
+        assertTrue(ex.getMessage().contains("no pertenece"));
+        verify(repository, never()).save(any(Rate.class));
+    }
+
+    @Test
+    @DisplayName("delete throws when rate belongs to different parking lot")
+    void deleteWithWrongParkingLotThrows() {
+        ParkingLot lotA = new ParkingLot();
+        lotA.setId(1L);
+        VehicleType vt = buildVehicleType();
+        Rate rate = buildRate(1L, lotA, vt);
+        when(repository.findById(1L)).thenReturn(Optional.of(rate));
+
+        RuntimeException ex = assertThrows(RuntimeException.class,
+                () -> rateService.delete(1L, 99L));
+
+        assertTrue(ex.getMessage().contains("no pertenece"));
+        verify(repository, never()).delete(any());
     }
 }
