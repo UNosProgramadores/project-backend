@@ -1,13 +1,16 @@
 package com.parking.backend.service;
 
+import com.parking.backend.entity.Invoice;
 import com.parking.backend.repository.CellRepository;
 import com.parking.backend.repository.EntryRecordRepository;
+import com.parking.backend.repository.InvoiceRepository;
 import com.parking.backend.repository.PaymentRepository;
 import com.parking.backend.repository.RateRepository;
 import com.parking.backend.repository.UserRepository;
 import com.parking.backend.repository.VehicleRepository;
 import com.parking.backend.repository.VehicleTypeRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import com.parking.backend.repository.ParkingLotRepository;
 
 import com.parking.backend.dto.VehicleEntryRequest;
@@ -27,6 +30,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.UUID;
 
 @Service
 public class EntryRecordService {
@@ -40,6 +44,7 @@ public class EntryRecordService {
     private final VehicleTypeRepository vehicleTypeRepository;
     private final DiscountService discountService;
     private final PaymentRepository paymentRepository;
+    private final InvoiceRepository invoiceRepository;
 
     public EntryRecordService(ParkingLotRepository parkingLotRepository,
                               EntryRecordRepository entryRecordRepository,
@@ -49,7 +54,8 @@ public class EntryRecordService {
                               UserRepository userRepository,
                               VehicleTypeRepository vehicleTypeRepository,
                               DiscountService discountService,
-                              PaymentRepository paymentRepository) {
+                              PaymentRepository paymentRepository,
+                              InvoiceRepository invoiceRepository) {
         this.parkingLotRepository = parkingLotRepository;
         this.entryRecordRepository = entryRecordRepository;
         this.vehicleRepository = vehicleRepository;
@@ -59,6 +65,7 @@ public class EntryRecordService {
         this.vehicleTypeRepository = vehicleTypeRepository;
         this.discountService = discountService;
         this.paymentRepository = paymentRepository;
+        this.invoiceRepository = invoiceRepository;
     }
 
     private Vehicle findOrCreateVehicle(String plate, String bikeRegistration, Long vehicleTypeId) {
@@ -162,6 +169,7 @@ public class EntryRecordService {
                 );
     }
 
+    @Transactional
     public VehicleExitResponse registerExit(VehicleExitRequest request) {
 
         Vehicle vehicle;
@@ -229,6 +237,12 @@ public class EntryRecordService {
         payment.setPaymentDate(LocalDateTime.now());
         paymentRepository.save(payment);
 
+        Invoice invoice = new Invoice();
+        invoice.setPayment(payment);
+        invoice.setInvoiceNumber("INV-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+        invoice.setIssuedAt(LocalDateTime.now());
+        invoice = invoiceRepository.save(invoice);
+
         VehicleExitResponse response = new VehicleExitResponse();
         response.setEntryRecordId(record.getId());
         response.setPlate(vehicle.getPlate());
@@ -242,6 +256,8 @@ public class EntryRecordService {
         response.setDiscountPercentage(discountPercentage);
         response.setDiscountAmount(discountAmount);
         response.setTotalPaid(totalPaid);
+        response.setPaymentMethod(request.getPaymentMethod());
+        response.setInvoiceId(invoice.getId());
 
         return response;
     }

@@ -10,6 +10,8 @@ import com.parking.backend.dto.VehicleExitRequest;
 import com.parking.backend.repository.CellRepository;
 import com.parking.backend.repository.EntryRecordRepository;
 import com.parking.backend.repository.ParkingLotRepository;
+import com.parking.backend.entity.Invoice;
+import com.parking.backend.repository.InvoiceRepository;
 import com.parking.backend.repository.PaymentRepository;
 import com.parking.backend.repository.RateRepository;
 import com.parking.backend.repository.UserRepository;
@@ -69,6 +71,9 @@ class EntryRecordServiceTest {
 
     @Mock
     private PaymentRepository paymentRepository;
+
+    @Mock
+    private InvoiceRepository invoiceRepository;
 
     @InjectMocks
     private EntryRecordService entryRecordService;
@@ -136,6 +141,7 @@ class EntryRecordServiceTest {
         exitRequest = new VehicleExitRequest();
         exitRequest.setPlate("ABC-123");
         exitRequest.setParkingLotId(1L);
+        exitRequest.setPaymentMethod("cash");
     }
 
     @AfterEach
@@ -243,6 +249,11 @@ class EntryRecordServiceTest {
         when(rateRepository.findByParkingLotAndVehicleTypeAndActive(parkingLot, carType, true))
                 .thenReturn(Optional.of(rate));
         when(paymentRepository.save(any(Payment.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(invoiceRepository.save(any(Invoice.class))).thenAnswer(inv -> {
+            Invoice invEntity = inv.getArgument(0);
+            invEntity.setId(999L);
+            return invEntity;
+        });
 
         var response = entryRecordService.registerExit(exitRequest);
 
@@ -287,6 +298,8 @@ class EntryRecordServiceTest {
         rate.setCost(new BigDecimal("50"));
         rate.setActive(true);
 
+        exitRequest.setPaymentMethod(null);
+
         when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
         when(entryRecordRepository.findByVehicleAndStatus(car, "active"))
                 .thenReturn(Optional.of(activeRecord));
@@ -294,6 +307,11 @@ class EntryRecordServiceTest {
         when(rateRepository.findByParkingLotAndVehicleTypeAndActive(parkingLot, carType, true))
                 .thenReturn(Optional.of(rate));
         when(paymentRepository.save(any(Payment.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(invoiceRepository.save(any(Invoice.class))).thenAnswer(inv -> {
+            Invoice invEntity = inv.getArgument(0);
+            invEntity.setId(999L);
+            return invEntity;
+        });
 
         var response = entryRecordService.registerExit(exitRequest);
 
@@ -545,17 +563,92 @@ class EntryRecordServiceTest {
         when(userRepository.findByUsername("lgomez")).thenReturn(Optional.of(staffUser));
         when(rateRepository.findByParkingLotAndVehicleTypeAndActive(parkingLot, carType, true))
                 .thenReturn(Optional.of(rate));
-        when(paymentRepository.save(any(Payment.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(inv -> {
+            Payment p = inv.getArgument(0);
+            p.setId(100L);
+            return p;
+        });
+        when(invoiceRepository.save(any(Invoice.class))).thenAnswer(inv -> {
+            Invoice invEntity = inv.getArgument(0);
+            invEntity.setId(200L);
+            return invEntity;
+        });
 
         var response = entryRecordService.registerExit(exitRequest);
 
         assertNotNull(response);
         assertEquals("ABC-123", response.getPlate());
         assertEquals(new BigDecimal("50"), response.getSubtotal());
+        assertEquals("cash", response.getPaymentMethod());
+        assertEquals(200L, response.getInvoiceId());
 
         verify(entryRecordRepository, times(1)).save(argThat(r ->
                 "completed".equals(r.getStatus())
         ));
-        verify(paymentRepository, times(1)).save(any(Payment.class));
+        verify(paymentRepository, times(1)).save(argThat(p ->
+                "cash".equals(p.getPaymentMethod())
+        ));
+        verify(invoiceRepository, times(1)).save(any(Invoice.class));
+    }
+
+    @Test
+    @DisplayName("Register exit for bike generates invoice with bikeRegistration")
+    void registerExitForBikeGeneratesInvoice() {
+        Cell bikeCell = new Cell();
+        bikeCell.setId(20L);
+        bikeCell.setParkingLot(parkingLot);
+        bikeCell.setVehicleType(bike.getVehicleType());
+        bikeCell.setStatus("available");
+
+        EntryRecord activeRecord = new EntryRecord();
+        activeRecord.setId(2L);
+        activeRecord.setVehicle(bike);
+        activeRecord.setCell(bikeCell);
+        activeRecord.setEntryTime(java.time.LocalDateTime.now().minusHours(1));
+        activeRecord.setStatus("active");
+
+        Rate rate = new Rate();
+        rate.setId(2L);
+        rate.setParkingLot(parkingLot);
+        rate.setVehicleType(bike.getVehicleType());
+        rate.setRateType("flat");
+        rate.setCost(new BigDecimal("10"));
+        rate.setActive(true);
+
+        VehicleExitRequest bikeExit = new VehicleExitRequest();
+        bikeExit.setBikeRegistration("BIKE-001");
+        bikeExit.setParkingLotId(1L);
+        bikeExit.setPaymentMethod("card");
+
+        when(vehicleRepository.findByBikeRegistration("BIKE-001")).thenReturn(Optional.of(bike));
+        when(entryRecordRepository.findByVehicleAndStatus(bike, "active"))
+                .thenReturn(Optional.of(activeRecord));
+        when(userRepository.findByUsername("lgomez")).thenReturn(Optional.of(staffUser));
+        when(rateRepository.findByParkingLotAndVehicleTypeAndActive(parkingLot, bike.getVehicleType(), true))
+                .thenReturn(Optional.of(rate));
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(inv -> {
+            Payment p = inv.getArgument(0);
+            p.setId(200L);
+            return p;
+        });
+        when(invoiceRepository.save(any(Invoice.class))).thenAnswer(inv -> {
+            Invoice invEntity = inv.getArgument(0);
+            invEntity.setId(300L);
+            return invEntity;
+        });
+
+        var response = entryRecordService.registerExit(bikeExit);
+
+        assertNotNull(response);
+        assertEquals("BIKE-001", response.getBikeRegistration());
+        assertEquals("bicycle", response.getVehicleType());
+        assertEquals("card", response.getPaymentMethod());
+        assertEquals(300L, response.getInvoiceId());
+        assertEquals(new BigDecimal("10"), response.getSubtotal());
+
+        verify(paymentRepository, times(1)).save(argThat(p ->
+                "card".equals(p.getPaymentMethod())
+        ));
+        verify(invoiceRepository, times(1)).save(any(Invoice.class));
     }
 }

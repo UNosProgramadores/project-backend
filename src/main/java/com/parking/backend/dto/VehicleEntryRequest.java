@@ -1,8 +1,12 @@
 package com.parking.backend.dto;
 
+import jakarta.validation.constraints.NotNull;
+
 public class VehicleEntryRequest {
 
     private Long parkingLotId;
+
+    @NotNull(message = "Vehicle type is required")
     private Long vehicleTypeId;
     private String plate;
     private String bikeRegistration;
