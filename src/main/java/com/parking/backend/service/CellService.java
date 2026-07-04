@@ -73,11 +73,14 @@ public class CellService {
     }
 
     @Transactional
-    public Cell updateCellType(Long cellId, String cellType) {
+    public Cell updateCellType(Long cellId, String cellType, Long parkingLotId) {
         if (!"parking".equals(cellType) && !"transit".equals(cellType)) {
             throw new RuntimeException("El tipo de celda debe ser 'parking' o 'transit'");
         }
         Cell cell = getById(cellId);
+        if (!cell.getParkingLot().getId().equals(parkingLotId)) {
+            throw new RuntimeException("La celda no pertenece a este parqueadero");
+        }
         cell.setCellType(cellType);
         if ("transit".equals(cellType)) {
             cell.setVehicleType(null);
@@ -86,8 +89,11 @@ public class CellService {
     }
 
     @Transactional
-    public Cell updateVehicleType(Long cellId, Long vehicleTypeId) {
+    public Cell updateVehicleType(Long cellId, Long vehicleTypeId, Long parkingLotId) {
         Cell cell = getById(cellId);
+        if (!cell.getParkingLot().getId().equals(parkingLotId)) {
+            throw new RuntimeException("La celda no pertenece a este parqueadero");
+        }
         if (!"parking".equals(cell.getCellType())) {
             throw new RuntimeException("Solo se puede asignar tipo de vehículo a celdas de tipo 'parking'");
         }

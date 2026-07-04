@@ -27,9 +27,13 @@ public class DiscountConfigService {
         return repository.findByParkingLot(lot);
     }
 
-    public DiscountConfig getById(Long id) {
-        return repository.findById(id)
+    public DiscountConfig getById(Long id, Long parkingLotId) {
+        DiscountConfig config = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Configuración de descuento no encontrada con ID: " + id));
+        if (!config.getParkingLot().getId().equals(parkingLotId)) {
+            throw new RuntimeException("La configuración de descuento no pertenece a este parqueadero");
+        }
+        return config;
     }
 
     @Transactional
@@ -41,8 +45,8 @@ public class DiscountConfigService {
     }
 
     @Transactional
-    public DiscountConfig update(Long id, DiscountConfigRequest request) {
-        DiscountConfig existing = getById(id);
+    public DiscountConfig update(Long id, Long parkingLotId, DiscountConfigRequest request) {
+        DiscountConfig existing = getById(id, parkingLotId);
         // RF_08: close the active record and create a new one
         existing.setActive(false);
         existing.setEndDate(LocalDateTime.now());
@@ -54,11 +58,9 @@ public class DiscountConfigService {
     }
 
     @Transactional
-    public void delete(Long id) {
-        if (!repository.existsById(id)) {
-            throw new RuntimeException("No se puede eliminar: Configuración de descuento no encontrada con ID: " + id);
-        }
-        repository.deleteById(id);
+    public void delete(Long id, Long parkingLotId) {
+        DiscountConfig config = getById(id, parkingLotId);
+        repository.delete(config);
     }
 
     public Optional<DiscountConfig> findActiveByParkingLot(ParkingLot parkingLot) {
