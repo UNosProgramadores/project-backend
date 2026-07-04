@@ -135,6 +135,7 @@ class EntryRecordServiceTest {
 
         exitRequest = new VehicleExitRequest();
         exitRequest.setPlate("ABC-123");
+        exitRequest.setParkingLotId(1L);
     }
 
     @AfterEach
@@ -479,5 +480,82 @@ class EntryRecordServiceTest {
 
         verify(cellRepository).findFirstByParkingLotAndVehicleTypeAndStatusAndReservedForStaff(
                 parkingLot, carType, "available", false);
+    }
+
+    @Test
+    @DisplayName("Register exit fails when parkingLotId does not match the vehicle's actual parking lot")
+    void registerExitWithWrongParkingLotThrowsException() {
+        ParkingLot otherLot = new ParkingLot();
+        otherLot.setId(99L);
+        otherLot.setName("Other Lot");
+
+        Cell cellInOtherLot = new Cell();
+        cellInOtherLot.setId(99L);
+        cellInOtherLot.setParkingLot(otherLot);
+        cellInOtherLot.setVehicleType(carType);
+        cellInOtherLot.setStatus("available");
+
+        EntryRecord activeRecord = new EntryRecord();
+        activeRecord.setId(1L);
+        activeRecord.setVehicle(car);
+        activeRecord.setCell(cellInOtherLot);
+        activeRecord.setEntryTime(java.time.LocalDateTime.now().minusHours(1));
+        activeRecord.setStatus("active");
+
+        exitRequest.setParkingLotId(1L);
+
+        when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
+        when(entryRecordRepository.findByVehicleAndStatus(car, "active"))
+                .thenReturn(Optional.of(activeRecord));
+
+        RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> entryRecordService.registerExit(exitRequest)
+        );
+
+        assertEquals("El vehiculo no se encuentra en este parqueadero", exception.getMessage());
+        verify(paymentRepository, never()).save(any());
+        verify(cellRepository, never()).save(any());
+        verify(entryRecordRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Register exit succeeds when parkingLotId matches the vehicle's actual parking lot")
+    void registerExitWithCorrectParkingLotSucceeds() {
+        EntryRecord activeRecord = new EntryRecord();
+        activeRecord.setId(1L);
+        activeRecord.setVehicle(car);
+        activeRecord.setCell(availableCell);
+        activeRecord.setEntryTime(java.time.LocalDateTime.now().minusHours(2));
+        activeRecord.setStatus("active");
+
+        Rate rate = new Rate();
+        rate.setId(1L);
+        rate.setParkingLot(parkingLot);
+        rate.setVehicleType(carType);
+        rate.setRateType("flat");
+        rate.setCost(new BigDecimal("50"));
+        rate.setActive(true);
+
+        exitRequest.setParkingLotId(1L);
+
+        when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
+        when(entryRecordRepository.findByVehicleAndStatus(car, "active"))
+                .thenReturn(Optional.of(activeRecord));
+        when(userRepository.findByUsername("lgomez")).thenReturn(Optional.of(staffUser));
+        when(rateRepository.findByParkingLotAndVehicleTypeAndActive(parkingLot, carType, true))
+                .thenReturn(Optional.of(rate));
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        var response = entryRecordService.registerExit(exitRequest);
+
+        assertNotNull(response);
+        assertEquals("ABC-123", response.getPlate());
+        assertEquals(new BigDecimal("50"), response.getSubtotal());
+
+        verify(entryRecordRepository, times(1)).save(argThat(r ->
+                "completed".equals(r.getStatus())
+        ));
+        verify(paymentRepository, times(1)).save(any(Payment.class));
     }
 }
