@@ -85,6 +85,7 @@ replay_pid*
 # Spring Boot config (SENSIBLE)
 ######################################
 application.properties
+application-test.properties
 application-local.properties
 application-dev.properties
 application-prod.properties
