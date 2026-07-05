@@ -6,6 +6,7 @@ import com.parking.backend.dto.RegisterRequest;
 import com.parking.backend.entity.ParkingLot;
 import com.parking.backend.entity.Role;
 import com.parking.backend.entity.User;
+import com.parking.backend.exception.InvalidCredentialsException;
 import com.parking.backend.repository.RoleRepository;
 import com.parking.backend.repository.UserRepository;
 import com.parking.backend.security.JwtUtil;
@@ -98,13 +99,13 @@ class AuthServiceTest {
 
         when(userRepository.findByUsername("cmendoza")).thenReturn(Optional.of(validUser));
 
-        RuntimeException exception = assertThrows(
-                RuntimeException.class,
+        InvalidCredentialsException exception = assertThrows(
+                InvalidCredentialsException.class,
                 () -> authService.login(wrongRequest),
-                "Should throw RuntimeException on failed login"
+                "Should throw InvalidCredentialsException on failed login"
         );
 
-        assertEquals("Invalid credentials", exception.getMessage());
+        assertEquals("Credenciales inválidas", exception.getMessage());
 
         verify(userRepository).save(argThat(u ->
                 u.getFailedAttempts() == 5 && Boolean.TRUE.equals(u.getBlocked())
@@ -130,7 +131,7 @@ class AuthServiceTest {
                 "Should throw RuntimeException when username is already taken"
         );
 
-        assertEquals("Username already taken", exception.getMessage());
+        assertEquals("El nombre de usuario ya está en uso", exception.getMessage());
 
         verify(userRepository, never()).save(any(User.class));
     }
