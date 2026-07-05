@@ -5,6 +5,7 @@ import com.parking.backend.dto.LoginRequest;
 import com.parking.backend.dto.RegisterRequest;
 import com.parking.backend.entity.Role;
 import com.parking.backend.entity.User;
+import com.parking.backend.exception.InvalidCredentialsException;
 import com.parking.backend.repository.UserRepository;
 import com.parking.backend.repository.RoleRepository;
 import com.parking.backend.security.JwtUtil;
@@ -38,20 +39,20 @@ public class AuthService {
     public AuthResponse login(LoginRequest request) {
 
         User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
+                .orElseThrow(() -> new InvalidCredentialsException("Credenciales inválidas"));
 
         if (Boolean.TRUE.equals(user.getBlocked())) {
-            throw new RuntimeException("Account is blocked. Contact an administrator.");
+            throw new InvalidCredentialsException("Cuenta bloqueada. Contacte a un administrador.");
         }
 
         if (Boolean.FALSE.equals(user.getActive())) {
-            throw new RuntimeException("Account is inactive. Contact an administrator.");
+            throw new InvalidCredentialsException("Cuenta inactiva. Contacte a un administrador.");
         }
 
         String hashedPassword = hashSha256(request.getPassword());
         if (!hashedPassword.equals(user.getPasswordHash())) {
             handleFailedAttempt(user);
-            throw new RuntimeException("Invalid credentials");
+            throw new InvalidCredentialsException("Credenciales inválidas");
         }
 
         user.setFailedAttempts(MIN_FAILED_ATTEMPTS);
@@ -66,15 +67,15 @@ public class AuthService {
     public AuthResponse register(RegisterRequest request) {
 
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("Username already taken");
+            throw new RuntimeException("El nombre de usuario ya está en uso");
         }
 
         if (userRepository.existsByDocument(request.getDocument())) {
-            throw new RuntimeException("Document already registered");
+            throw new RuntimeException("El documento ya está registrado");
         }
 
         Role customerRole = roleRepository.findByName("customer")
-                .orElseThrow(() -> new RuntimeException("Role 'customer' not found in database"));
+                .orElseThrow(() -> new RuntimeException("Rol 'customer' no encontrado en la base de datos"));
 
 
         User user = new User();
@@ -114,7 +115,7 @@ public class AuthService {
             byte[] hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
             return HexFormat.of().formatHex(hash);
         } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("SHA-256 algorithm not available", e);
+            throw new RuntimeException("Algoritmo SHA-256 no disponible", e);
         }
     }
 }

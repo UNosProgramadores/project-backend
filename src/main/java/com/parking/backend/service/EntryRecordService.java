@@ -75,7 +75,7 @@ public class EntryRecordService {
                         Vehicle v = new Vehicle();
                         v.setPlate(plate);
                         v.setVehicleType(vehicleTypeRepository.findById(vehicleTypeId)
-                                .orElseThrow(() -> new RuntimeException("Invalid vehicle type")));
+                                .orElseThrow(() -> new RuntimeException("Tipo de vehículo inválido")));
                         v.setActive(true);
                         return vehicleRepository.save(v);
                     });
@@ -86,12 +86,12 @@ public class EntryRecordService {
                         Vehicle v = new Vehicle();
                         v.setBikeRegistration(bikeRegistration);
                         v.setVehicleType(vehicleTypeRepository.findById(vehicleTypeId)
-                                .orElseThrow(() -> new RuntimeException("Invalid vehicle type")));
+                                .orElseThrow(() -> new RuntimeException("Tipo de vehículo inválido")));
                         v.setActive(true);
                         return vehicleRepository.save(v);
                     });
         }
-        throw new RuntimeException("Plate or bike registration is required");
+        throw new RuntimeException("Placa o registro de bicicleta es requerido");
     }
 
     @Transactional
@@ -100,7 +100,7 @@ public class EntryRecordService {
         ParkingLot parkingLot = parkingLotRepository.findById(
                 request.getParkingLotId()
         ).orElseThrow(() ->
-                new RuntimeException("Parking lot not found")
+                new RuntimeException("Parqueadero no encontrado")
         );
 
         Vehicle vehicle = findOrCreateVehicle(
@@ -111,7 +111,7 @@ public class EntryRecordService {
                 "active"
         ).ifPresent(record -> {
             throw new RuntimeException(
-                    "Vehicle already inside parking lot"
+                    "El vehículo ya se encuentra dentro del parqueadero"
             );
         });
 
@@ -135,23 +135,23 @@ public class EntryRecordService {
     private Cell resolveCell(ParkingLot parkingLot, Vehicle vehicle, VehicleEntryRequest request) {
         if (Boolean.FALSE.equals(parkingLot.getAutoAssignment())) {
             if (request.getCellId() == null) {
-                throw new RuntimeException(
-                        "Auto-assignment is disabled. A cellId is required."
-                );
+                        throw new RuntimeException(
+                                "La asignación automática está deshabilitada. Se requiere un cellId."
+                        );
             }
             Cell cell = cellRepository.findByIdAndParkingLot(request.getCellId(), parkingLot)
                     .orElseThrow(() -> new RuntimeException(
-                            "Cell not found in this parking lot"
+                            "Celda no encontrada en este parqueadero"
                     ));
             if (!"available".equals(cell.getStatus())) {
-                throw new RuntimeException("Selected cell is not available");
+                throw new RuntimeException("La celda seleccionada no está disponible");
             }
             if (!"parking".equals(cell.getCellType())) {
-                throw new RuntimeException("Selected cell is not a parking cell");
+                throw new RuntimeException("La celda seleccionada no es de tipo estacionamiento");
             }
             if (!vehicle.getVehicleType().getId().equals(cell.getVehicleType().getId())) {
                 throw new RuntimeException(
-                        "Selected cell does not support vehicle type " + vehicle.getVehicleType().getName()
+                        "La celda seleccionada no soporta el tipo de vehículo " + vehicle.getVehicleType().getName()
                 );
             }
             return cell;
@@ -165,7 +165,7 @@ public class EntryRecordService {
                 )
                 .orElseThrow(() ->
                         new RuntimeException(
-                                "No available cell found"
+                                "No se encontró una celda disponible"
                         )
                 );
     }
@@ -177,18 +177,18 @@ public class EntryRecordService {
 
         if (request.getPlate() != null && !request.getPlate().isBlank()) {
             vehicle = vehicleRepository.findByPlate(request.getPlate())
-                    .orElseThrow(() -> new RuntimeException("Vehicle not found"));
+                    .orElseThrow(() -> new RuntimeException("Vehículo no encontrado"));
 
         } else if (request.getBikeRegistration() != null && !request.getBikeRegistration().isBlank()) {
             vehicle = vehicleRepository.findByBikeRegistration(request.getBikeRegistration())
-                    .orElseThrow(() -> new RuntimeException("Vehicle not found"));
+                    .orElseThrow(() -> new RuntimeException("Vehículo no encontrado"));
 
         } else {
-            throw new RuntimeException("Plate or bike registration is required");
+            throw new RuntimeException("Placa o registro de bicicleta es requerido");
         }
 
         EntryRecord record = entryRecordRepository.findByVehicleAndStatus(vehicle, "active")
-                .orElseThrow(() -> new RuntimeException("No active entry found for this vehicle"));
+                .orElseThrow(() -> new RuntimeException("No se encontró una entrada activa para este vehículo"));
 
         Long recordParkingLotId = record.getCell().getParkingLot().getId();
         if (!recordParkingLotId.equals(request.getParkingLotId())) {
@@ -212,7 +212,7 @@ public class EntryRecordService {
         ParkingLot parkingLot = cell.getParkingLot();
         Rate rate = rateRepository
                 .findByParkingLotAndVehicleTypeAndActive(parkingLot, vehicle.getVehicleType(), true)
-                .orElseThrow(() -> new RuntimeException("No active rate found for this vehicle type"));
+                .orElseThrow(() -> new RuntimeException("No se encontró una tarifa activa para este tipo de vehículo"));
 
         BigDecimal subtotal = "per_minute".equals(rate.getRateType())
                 ? rate.getCost().multiply(BigDecimal.valueOf(duration))

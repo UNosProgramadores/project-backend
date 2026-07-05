@@ -24,16 +24,16 @@ public class VehicleService {
     public Vehicle claimVehicle(ClaimVehicleRequest request) {
         Vehicle vehicle = findVehicle(request);
         if (vehicle == null) {
-            throw new RuntimeException("Vehicle not found. Only existing vehicles that have entered the parking lot can be claimed.");
+            throw new RuntimeException("Vehículo no encontrado. Solo se pueden reclamar vehículos existentes que hayan ingresado al parqueadero.");
         }
 
         User currentUser = getCurrentUser();
         if (currentUser == null) {
-            throw new RuntimeException("Authenticated user not found");
+            throw new RuntimeException("Usuario autenticado no encontrado");
         }
 
         if (vehicle.getOwner() != null && !vehicle.getOwner().getId().equals(currentUser.getId())) {
-            throw new RuntimeException("This vehicle is already associated with another user");
+            throw new RuntimeException("Este vehículo ya está asociado a otro usuario");
         }
 
         vehicle.setOwner(currentUser);
@@ -47,7 +47,7 @@ public class VehicleService {
         if (request.getBikeRegistration() != null && !request.getBikeRegistration().isBlank()) {
             return vehicleRepository.findByBikeRegistration(request.getBikeRegistration()).orElse(null);
         }
-        throw new RuntimeException("Plate or bike registration is required");
+        throw new RuntimeException("Placa o registro de bicicleta es requerido");
     }
 
     private User getCurrentUser() {
