@@ -5,6 +5,7 @@ import com.parking.backend.dto.CellVehicleTypeRequest;
 import com.parking.backend.entity.Cell;
 import com.parking.backend.service.CellService;
 import com.parking.backend.service.ParkingLotService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,25 +32,17 @@ public class CellController {
     public ResponseEntity<?> updateCellType(
             @PathVariable Long parkingLotId,
             @PathVariable Long cellId,
-            @RequestBody CellTypeRequest request) {
-        try {
-            Cell cell = cellService.updateCellType(cellId, request.getCellType(), parkingLotId);
-            return ResponseEntity.ok(cell);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+            @Valid @RequestBody CellTypeRequest request) {
+        Cell cell = cellService.updateCellType(cellId, request.getCellType(), parkingLotId);
+        return ResponseEntity.ok(cell);
     }
 
     @PatchMapping("/{cellId}/vehicle-type")
     public ResponseEntity<?> updateVehicleType(
             @PathVariable Long parkingLotId,
             @PathVariable Long cellId,
-            @RequestBody CellVehicleTypeRequest request) {
-        try {
-            Cell cell = cellService.updateVehicleType(cellId, request.getVehicleTypeId(), parkingLotId);
-            return ResponseEntity.ok(cell);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+            @Valid @RequestBody CellVehicleTypeRequest request) {
+        Cell cell = cellService.updateVehicleType(cellId, request.getVehicleTypeId(), parkingLotId);
+        return ResponseEntity.ok(cell);
     }
 }
