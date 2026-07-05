@@ -337,7 +337,7 @@ class EntryRecordServiceTest {
                 () -> entryRecordService.registerEntry(plateRequest)
         );
 
-        assertEquals("Vehicle already inside parking lot", exception.getMessage());
+        assertEquals("El vehículo ya se encuentra dentro del parqueadero", exception.getMessage());
         verify(cellRepository, never()).findFirstByParkingLotAndVehicleTypeAndStatusAndReservedForStaff(any(), any(), any(), any());
         verify(entryRecordRepository, never()).save(any());
     }
@@ -385,7 +385,7 @@ class EntryRecordServiceTest {
                 () -> entryRecordService.registerEntry(plateRequest)
         );
 
-        assertEquals("Auto-assignment is disabled. A cellId is required.", exception.getMessage());
+        assertEquals("La asignación automática está deshabilitada. Se requiere un cellId.", exception.getMessage());
         verify(cellRepository, never()).findByIdAndParkingLot(any(), any());
     }
 
@@ -406,7 +406,7 @@ class EntryRecordServiceTest {
                 () -> entryRecordService.registerEntry(plateRequest)
         );
 
-        assertEquals("Cell not found in this parking lot", exception.getMessage());
+        assertEquals("Celda no encontrada en este parqueadero", exception.getMessage());
     }
 
     @Test
@@ -429,7 +429,7 @@ class EntryRecordServiceTest {
                 () -> entryRecordService.registerEntry(plateRequest)
         );
 
-        assertEquals("Selected cell is not available", exception.getMessage());
+        assertEquals("La celda seleccionada no está disponible", exception.getMessage());
     }
 
     @Test
@@ -451,7 +451,7 @@ class EntryRecordServiceTest {
                 () -> entryRecordService.registerEntry(plateRequest)
         );
 
-        assertEquals("Selected cell is not a parking cell", exception.getMessage());
+        assertEquals("La celda seleccionada no es de tipo estacionamiento", exception.getMessage());
     }
 
     @Test
@@ -477,7 +477,7 @@ class EntryRecordServiceTest {
                 () -> entryRecordService.registerEntry(plateRequest)
         );
 
-        assertTrue(exception.getMessage().contains("does not support vehicle type"));
+        assertTrue(exception.getMessage().contains("no soporta el tipo de vehículo"));
     }
 
     @Test

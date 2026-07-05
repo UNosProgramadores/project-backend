@@ -255,6 +255,6 @@ class ReportServiceTest {
         RuntimeException ex = assertThrows(RuntimeException.class,
                 () -> reportService.generateReport(1L, "year", LocalDate.of(2026, 7, 4)));
 
-        assertTrue(ex.getMessage().contains("Invalid period"));
+        assertTrue(ex.getMessage().contains("Período inválido"));
     }
 }

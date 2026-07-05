@@ -3,6 +3,7 @@ package com.parking.backend.controller;
 import com.parking.backend.dto.DiscountConfigRequest;
 import com.parking.backend.entity.DiscountConfig;
 import com.parking.backend.service.DiscountConfigService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +33,7 @@ public class DiscountConfigController {
     @PostMapping("/config")
     public ResponseEntity<DiscountConfig> createConfig(
             @PathVariable Long parkingLotId,
-            @RequestBody DiscountConfigRequest request) {
+            @Valid @RequestBody DiscountConfigRequest request) {
         return new ResponseEntity<>(discountConfigService.create(parkingLotId, request), HttpStatus.CREATED);
     }
 
@@ -40,7 +41,7 @@ public class DiscountConfigController {
     public ResponseEntity<DiscountConfig> updateConfig(
             @PathVariable Long parkingLotId,
             @PathVariable Long id,
-            @RequestBody DiscountConfigRequest request) {
+            @Valid @RequestBody DiscountConfigRequest request) {
         return ResponseEntity.ok(discountConfigService.update(id, parkingLotId, request));
     }
 

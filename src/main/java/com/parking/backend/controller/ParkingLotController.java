@@ -45,11 +45,7 @@ public class ParkingLotController {
 
     @GetMapping("/{parkingLotId}/map")
     public ResponseEntity<?> getMap(@PathVariable Long parkingLotId) {
-        try {
-            return ResponseEntity.ok(cellService.getMap(parkingLotId));
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        return ResponseEntity.ok(cellService.getMap(parkingLotId));
     }
 
     @PostMapping
@@ -77,25 +73,17 @@ public class ParkingLotController {
     public ResponseEntity<?> registerEntry(
             @PathVariable Long parkingLotId,
             @Valid @RequestBody VehicleEntryRequest request) {
-        try {
-            request.setParkingLotId(parkingLotId);
-            EntryRecord record = entryRecordService.registerEntry(request);
-            return new ResponseEntity<>(record, HttpStatus.CREATED);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        request.setParkingLotId(parkingLotId);
+        EntryRecord record = entryRecordService.registerEntry(request);
+        return new ResponseEntity<>(record, HttpStatus.CREATED);
     }
 
     @PostMapping("/{parkingLotId}/exit")
     public ResponseEntity<?> registerExit(
             @PathVariable Long parkingLotId,
-            @RequestBody VehicleExitRequest request) {
-        try {
-            request.setParkingLotId(parkingLotId);
-            VehicleExitResponse response = entryRecordService.registerExit(request);
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+            @Valid @RequestBody VehicleExitRequest request) {
+        request.setParkingLotId(parkingLotId);
+        VehicleExitResponse response = entryRecordService.registerExit(request);
+        return ResponseEntity.ok(response);
     }
 }

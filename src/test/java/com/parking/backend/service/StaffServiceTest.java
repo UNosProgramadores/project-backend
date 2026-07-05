@@ -94,7 +94,7 @@ class StaffServiceTest {
         RuntimeException ex = assertThrows(RuntimeException.class,
                 () -> staffService.registerStaff(request));
 
-        assertEquals("Username already taken", ex.getMessage());
+        assertEquals("El nombre de usuario ya está en uso", ex.getMessage());
         verify(userRepository, never()).save(any(User.class));
     }
 
@@ -114,7 +114,7 @@ class StaffServiceTest {
         RuntimeException ex = assertThrows(RuntimeException.class,
                 () -> staffService.registerStaff(request));
 
-        assertEquals("Document already registered", ex.getMessage());
+        assertEquals("El documento ya está registrado", ex.getMessage());
         verify(userRepository, never()).save(any(User.class));
     }
 

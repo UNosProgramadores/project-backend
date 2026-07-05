@@ -123,7 +123,7 @@ class VehicleServiceTest {
         RuntimeException ex = assertThrows(RuntimeException.class,
                 () -> vehicleService.claimVehicle(request));
 
-        assertTrue(ex.getMessage().contains("not found"));
+        assertTrue(ex.getMessage().contains("Vehículo no encontrado"));
         verify(vehicleRepository, never()).save(any());
     }
 
@@ -139,7 +139,7 @@ class VehicleServiceTest {
         RuntimeException ex = assertThrows(RuntimeException.class,
                 () -> vehicleService.claimVehicle(request));
 
-        assertTrue(ex.getMessage().contains("already associated"));
+        assertTrue(ex.getMessage().contains("ya está asociado"));
         verify(vehicleRepository, never()).save(any());
     }
 
@@ -153,6 +153,6 @@ class VehicleServiceTest {
         RuntimeException ex = assertThrows(RuntimeException.class,
                 () -> vehicleService.claimVehicle(request));
 
-        assertTrue(ex.getMessage().contains("required"));
+        assertTrue(ex.getMessage().contains("es requerido"));
     }
 }

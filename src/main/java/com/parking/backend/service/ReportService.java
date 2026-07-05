@@ -79,7 +79,7 @@ public class ReportService {
             case "day" -> date.atStartOfDay();
             case "week" -> date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).atStartOfDay();
             case "month" -> date.withDayOfMonth(1).atStartOfDay();
-            default -> throw new RuntimeException("Invalid period: " + period + ". Must be 'day', 'week', or 'month'");
+            default -> throw new RuntimeException("Período inválido: " + period + ". Debe ser 'day', 'week' o 'month'");
         };
     }
 
@@ -88,7 +88,7 @@ public class ReportService {
             case "day" -> date.plusDays(1);
             case "week" -> date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).plusWeeks(1);
             case "month" -> date.withDayOfMonth(1).plusMonths(1);
-            default -> throw new RuntimeException("Invalid period: " + period);
+            default -> throw new RuntimeException("Período inválido: " + period);
         };
         return endDate.atStartOfDay();
     }

@@ -23,14 +23,10 @@ public class ReportController {
             @PathVariable Long parkingLotId,
             @RequestParam String period,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        try {
-            if (date == null) {
-                date = LocalDate.now();
-            }
-            ReportResponse response = reportService.generateReport(parkingLotId, period, date);
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+        if (date == null) {
+            date = LocalDate.now();
         }
+        ReportResponse response = reportService.generateReport(parkingLotId, period, date);
+        return ResponseEntity.ok(response);
     }
 }

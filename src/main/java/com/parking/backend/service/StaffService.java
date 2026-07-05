@@ -28,17 +28,17 @@ public class StaffService {
 
     public User registerStaff(StaffRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("Username already taken");
+            throw new RuntimeException("El nombre de usuario ya está en uso");
         }
         if (userRepository.existsByDocument(request.getDocument())) {
-            throw new RuntimeException("Document already registered");
+            throw new RuntimeException("El documento ya está registrado");
         }
 
         Role staffRole = roleRepository.findByName("staff")
-                .orElseThrow(() -> new RuntimeException("Role 'staff' not found in database"));
+                .orElseThrow(() -> new RuntimeException("Rol 'staff' no encontrado en la base de datos"));
 
         ParkingLot parkingLot = parkingLotRepository.findById(request.getParkingLotId())
-                .orElseThrow(() -> new RuntimeException("Parking lot not found with ID: " + request.getParkingLotId()));
+                .orElseThrow(() -> new RuntimeException("Parqueadero no encontrado con ID: " + request.getParkingLotId()));
 
         User user = new User();
         user.setDocument(request.getDocument());
@@ -58,7 +58,7 @@ public class StaffService {
 
     public User unlockUser(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + userId));
 
         user.setFailedAttempts(0);
         user.setBlocked(false);

@@ -3,6 +3,7 @@ package com.parking.backend.controller;
 import com.parking.backend.dto.RateRequest;
 import com.parking.backend.entity.Rate;
 import com.parking.backend.service.RateService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +33,7 @@ public class RateController {
     @PostMapping
     public ResponseEntity<Rate> createRate(
             @PathVariable Long parkingLotId,
-            @RequestBody RateRequest request) {
+            @Valid @RequestBody RateRequest request) {
         return new ResponseEntity<>(rateService.create(parkingLotId, request), HttpStatus.CREATED);
     }
 
@@ -40,7 +41,7 @@ public class RateController {
     public ResponseEntity<Rate> updateRate(
             @PathVariable Long parkingLotId,
             @PathVariable Long id,
-            @RequestBody RateRequest request) {
+            @Valid @RequestBody RateRequest request) {
         return ResponseEntity.ok(rateService.update(id, parkingLotId, request));
     }
 

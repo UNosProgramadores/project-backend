@@ -4,9 +4,10 @@ import jakarta.validation.constraints.NotNull;
 
 public class VehicleEntryRequest {
 
+    @NotNull(message = "El id del parqueadero es requerido")
     private Long parkingLotId;
 
-    @NotNull(message = "Vehicle type is required")
+    @NotNull(message = "El tipo de vehículo es requerido")
     private Long vehicleTypeId;
     private String plate;
     private String bikeRegistration;
