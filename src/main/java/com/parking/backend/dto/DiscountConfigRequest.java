@@ -1,5 +1,9 @@
 package com.parking.backend.dto;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -7,6 +11,10 @@ public class DiscountConfigRequest {
 
     private BigDecimal minExternalInvoice;
     private Integer minVisits;
+
+    @NotNull(message = "El porcentaje de descuento es requerido")
+    @Min(value = 0, message = "El porcentaje de descuento debe ser mayor o igual a 0")
+    @Max(value = 100, message = "El porcentaje de descuento debe ser menor o igual a 100")
     private BigDecimal discountPercentage;
     private Boolean active;
     private LocalDateTime startDate;

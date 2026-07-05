@@ -1,10 +1,17 @@
 package com.parking.backend.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 public class VehicleExitRequest {
 
+    @NotNull(message = "El id del parqueadero es requerido")
     private Long parkingLotId;
+
     private String plate;
     private String bikeRegistration;
+
+    @NotBlank(message = "El método de pago es requerido")
     private String paymentMethod;
 
     public Long getParkingLotId() {
