@@ -21,11 +21,9 @@ public class InvoiceController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getById(@PathVariable Long id) {
-        var opt = invoiceRepository.findById(id);
-        if (opt.isPresent()) {
-            return ResponseEntity.ok(toResponse(opt.get()));
-        }
-        return ResponseEntity.badRequest().body("Factura no encontrada con ID: " + id);
+        Invoice invoice = invoiceRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Factura no encontrada con ID: " + id));
+        return ResponseEntity.ok(toResponse(invoice));
     }
 
     private InvoiceResponse toResponse(Invoice invoice) {

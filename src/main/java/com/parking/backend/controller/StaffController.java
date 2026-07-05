@@ -20,21 +20,13 @@ public class StaffController {
 
     @PostMapping
     public ResponseEntity<?> registerStaff(@Valid @RequestBody StaffRequest request) {
-        try {
-            User user = staffService.registerStaff(request);
-            return new ResponseEntity<>(user, HttpStatus.CREATED);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        User user = staffService.registerStaff(request);
+        return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
 
     @PostMapping("/{userId}/unlock")
     public ResponseEntity<?> unlockUser(@PathVariable Long userId) {
-        try {
-            User user = staffService.unlockUser(userId);
-            return ResponseEntity.ok(user);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        User user = staffService.unlockUser(userId);
+        return ResponseEntity.ok(user);
     }
 }
