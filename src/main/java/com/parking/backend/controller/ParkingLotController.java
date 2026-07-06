@@ -1,5 +1,6 @@
 package com.parking.backend.controller;
 
+import com.parking.backend.dto.ActiveEntryResponse;
 import com.parking.backend.dto.ParkingLotRequest;
 import com.parking.backend.dto.ParkingMapResponse;
 import com.parking.backend.dto.VehicleEntryRequest;
@@ -67,6 +68,11 @@ public class ParkingLotController {
     @PatchMapping("/{id}/discounts/toggle")
     public ResponseEntity<ParkingLot> toggleDiscounts(@PathVariable Long id) {
         return ResponseEntity.ok(parkingLotService.toggleDiscountsEnabled(id));
+    }
+
+    @GetMapping("/{parkingLotId}/active-entries")
+    public ResponseEntity<List<ActiveEntryResponse>> getActiveEntries(@PathVariable Long parkingLotId) {
+        return ResponseEntity.ok(entryRecordService.getActiveEntries(parkingLotId));
     }
 
     @PostMapping("/{parkingLotId}/entry")
