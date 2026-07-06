@@ -38,9 +38,9 @@ public class CellService {
         List<Cell> cells = cellRepository.findByParkingLot(lot);
 
         List<List<CellDto>> grid = new ArrayList<>();
-        for (int r = 1; r <= lot.getRows(); r++) {
+        for (int r = 0; r < lot.getRows(); r++) {
             List<CellDto> row = new ArrayList<>();
-            for (int c = 1; c <= lot.getColumns(); c++) {
+            for (int c = 0; c < lot.getColumns(); c++) {
                 row.add(null);
             }
             grid.add(row);
@@ -58,7 +58,7 @@ public class CellService {
                     cell.getVehicleType() != null ? cell.getVehicleType().getName() : null,
                     cell.getReservedForStaff()
             );
-            grid.get(cell.getRow() - 1).set(cell.getCol() - 1, dto);
+            grid.get(cell.getRow()).set(cell.getCol(), dto);
         }
 
         return new ParkingMapResponse(
