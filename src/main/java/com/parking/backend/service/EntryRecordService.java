@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.parking.backend.repository.ParkingLotRepository;
 
+import com.parking.backend.dto.ActiveEntryResponse;
 import com.parking.backend.dto.VehicleEntryRequest;
 import com.parking.backend.dto.VehicleExitRequest;
 import com.parking.backend.dto.VehicleExitResponse;
@@ -30,6 +31,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -277,6 +279,23 @@ public class EntryRecordService {
         response.setInvoiceId(invoice.getId());
 
         return response;
+    }
+
+    public List<ActiveEntryResponse> getActiveEntries(Long parkingLotId) {
+        return entryRecordRepository
+                .findByCell_ParkingLot_IdAndStatusOrderByEntryTimeDesc(parkingLotId, "active")
+                .stream()
+                .map(er -> {
+                    ActiveEntryResponse r = new ActiveEntryResponse();
+                    r.setEntryRecordId(er.getId());
+                    r.setPlate(er.getVehicle().getPlate());
+                    r.setBikeRegistration(er.getVehicle().getBikeRegistration());
+                    r.setVehicleType(er.getVehicle().getVehicleType().getName());
+                    r.setCellCode(er.getCell().getCode());
+                    r.setEntryTime(er.getEntryTime());
+                    return r;
+                })
+                .toList();
     }
 
     private User getCurrentUser() {
