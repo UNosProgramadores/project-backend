@@ -70,27 +70,43 @@ public class EntryRecordService {
 
     private Vehicle findOrCreateVehicle(String plate, String bikeRegistration, Long vehicleTypeId) {
         if (plate != null && !plate.isBlank()) {
-            return vehicleRepository.findByPlate(plate)
-                    .orElseGet(() -> {
-                        Vehicle v = new Vehicle();
-                        v.setPlate(plate);
-                        v.setVehicleType(vehicleTypeRepository.findById(vehicleTypeId)
-                                .orElseThrow(() -> new RuntimeException("Tipo de vehículo inválido")));
-                        v.setActive(true);
-                        return vehicleRepository.save(v);
-                    });
+            return vehicleRepository.findByPlate(plate).orElseGet(() -> {
+                if (vehicleTypeId == null) {
+                    throw new RuntimeException("vehicleTypeId es requerido");
+                }
+                VehicleType vehicleType = vehicleTypeRepository.findById(vehicleTypeId)
+                        .orElseThrow(() -> new RuntimeException("Tipo de vehículo inválido"));
+                boolean requiresPlate = Boolean.TRUE.equals(vehicleType.getRequiresPlate());
+                if (!requiresPlate) {
+                    throw new RuntimeException("El tipo de vehículo proporcionado no acepta placa");
+                }
+                Vehicle v = new Vehicle();
+                v.setPlate(plate);
+                v.setVehicleType(vehicleType);
+                v.setActive(true);
+                return vehicleRepository.save(v);
+            });
         }
+
         if (bikeRegistration != null && !bikeRegistration.isBlank()) {
-            return vehicleRepository.findByBikeRegistration(bikeRegistration)
-                    .orElseGet(() -> {
-                        Vehicle v = new Vehicle();
-                        v.setBikeRegistration(bikeRegistration);
-                        v.setVehicleType(vehicleTypeRepository.findById(vehicleTypeId)
-                                .orElseThrow(() -> new RuntimeException("Tipo de vehículo inválido")));
-                        v.setActive(true);
-                        return vehicleRepository.save(v);
-                    });
+            return vehicleRepository.findByBikeRegistration(bikeRegistration).orElseGet(() -> {
+                if (vehicleTypeId == null) {
+                    throw new RuntimeException("vehicleTypeId es requerido");
+                }
+                VehicleType vehicleType = vehicleTypeRepository.findById(vehicleTypeId)
+                        .orElseThrow(() -> new RuntimeException("Tipo de vehículo inválido"));
+                boolean requiresPlate = Boolean.TRUE.equals(vehicleType.getRequiresPlate());
+                if (requiresPlate) {
+                    throw new RuntimeException("El tipo de vehículo proporcionado requiere placa, no bikeRegistration");
+                }
+                Vehicle v = new Vehicle();
+                v.setBikeRegistration(bikeRegistration);
+                v.setVehicleType(vehicleType);
+                v.setActive(true);
+                return vehicleRepository.save(v);
+            });
         }
+
         throw new RuntimeException("Placa o registro de bicicleta es requerido");
     }
 
@@ -223,10 +239,10 @@ public class EntryRecordService {
                 ? discountService.calculateDiscount(parkingLot, owner, subtotal)
                 : BigDecimal.ZERO;
         BigDecimal totalPaid = subtotal.subtract(discountAmount);
-
-        BigDecimal discountPercentage = discountAmount.compareTo(BigDecimal.ZERO) > 0
-                ? discountAmount.multiply(BigDecimal.valueOf(100)).divide(subtotal, java.math.RoundingMode.HALF_UP)
-                : BigDecimal.ZERO;
+        BigDecimal discountPercentage = BigDecimal.ZERO;
+        if (subtotal.compareTo(BigDecimal.ZERO) > 0 && discountAmount.compareTo(BigDecimal.ZERO) > 0) {
+            discountPercentage = discountAmount.multiply(BigDecimal.valueOf(100)).divide(subtotal, java.math.RoundingMode.HALF_UP);
+        }
 
         Payment payment = new Payment();
         payment.setEntryRecord(record);
@@ -269,7 +285,7 @@ public class EntryRecordService {
                 || "anonymousUser".equals(authentication.getPrincipal())) {
             return null;
         }
-        String username = (String) authentication.getPrincipal();
+        String username = authentication.getName();
         return userRepository.findByUsername(username).orElse(null);
     }
 }
