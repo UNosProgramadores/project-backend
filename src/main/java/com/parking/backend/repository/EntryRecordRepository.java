@@ -20,6 +20,8 @@ public interface EntryRecordRepository extends JpaRepository<EntryRecord, Long> 
 
     long countByVehicle_OwnerAndCell_ParkingLotAndStatus(User user, ParkingLot parkingLot, String status);
 
+    List<EntryRecord> findByCell_ParkingLot_IdAndStatusOrderByEntryTimeDesc(Long parkingLotId, String status);
+
     @Query("SELECT er.vehicle.vehicleType.name, COUNT(er) FROM EntryRecord er " +
            "WHERE er.cell.parkingLot.id = :parkingLotId " +
            "AND er.entryTime >= :start AND er.entryTime < :end " +
