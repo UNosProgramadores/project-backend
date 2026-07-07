@@ -196,9 +196,9 @@ class CellServiceTest {
     void getMapReturnsCorrectDimensions() {
         ParkingLot lot = buildLot(3, 4);
         List<Cell> cells = new ArrayList<>();
-        for (int r = 1; r <= 3; r++) {
-            for (int c = 1; c <= 4; c++) {
-                cells.add(buildMapCell((long) ((r - 1) * 4 + c), r, c, r + "-" + c,
+        for (int r = 0; r < 3; r++) {
+            for (int c = 0; c < 4; c++) {
+                cells.add(buildMapCell((long) (r * 4 + c + 1), r, c, (r + 1) + "-" + (c + 1),
                         "parking", "available", null, false));
             }
         }
@@ -230,12 +230,12 @@ class CellServiceTest {
         motorcycle.setName("motorcycle");
 
         List<Cell> cells = List.of(
-                buildMapCell(1L, 1, 1, "1-1", "parking", "occupied", car, false),
-                buildMapCell(2L, 1, 2, "1-2", "transit", "available", null, false),
-                buildMapCell(3L, 1, 3, "1-3", "parking", "available", motorcycle, true),
-                buildMapCell(4L, 2, 1, "2-1", "parking", "available", null, false),
-                buildMapCell(5L, 2, 2, "2-2", "parking", "occupied", car, false),
-                buildMapCell(6L, 2, 3, "2-3", "parking", "available", null, false)
+                buildMapCell(1L, 0, 0, "1-1", "parking", "occupied", car, false),
+                buildMapCell(2L, 0, 1, "1-2", "transit", "available", null, false),
+                buildMapCell(3L, 0, 2, "1-3", "parking", "available", motorcycle, true),
+                buildMapCell(4L, 1, 0, "2-1", "parking", "available", null, false),
+                buildMapCell(5L, 1, 1, "2-2", "parking", "occupied", car, false),
+                buildMapCell(6L, 1, 2, "2-3", "parking", "available", null, false)
         );
         when(parkingLotService.getById(1L)).thenReturn(lot);
         when(cellRepository.findByParkingLot(lot)).thenReturn(cells);
@@ -278,7 +278,7 @@ class CellServiceTest {
     @DisplayName("getMap with 1x1 parking lot (minimum case)")
     void getMapWithOneByOne() {
         ParkingLot lot = buildLot(1, 1);
-        Cell cell = buildMapCell(1L, 1, 1, "1-1", "parking", "available", null, false);
+        Cell cell = buildMapCell(1L, 0, 0, "1-1", "parking", "available", null, false);
         when(parkingLotService.getById(1L)).thenReturn(lot);
         when(cellRepository.findByParkingLot(lot)).thenReturn(List.of(cell));
 
@@ -297,9 +297,9 @@ class CellServiceTest {
     void getMapWithMissingCells() {
         ParkingLot lot = buildLot(2, 3);
         List<Cell> cells = List.of(
-                buildMapCell(1L, 1, 1, "1-1", "parking", "available", null, false),
-                buildMapCell(3L, 1, 3, "1-3", "parking", "occupied", null, false),
-                buildMapCell(4L, 2, 1, "2-1", "parking", "available", null, false)
+                buildMapCell(1L, 0, 0, "1-1", "parking", "available", null, false),
+                buildMapCell(3L, 0, 2, "1-3", "parking", "occupied", null, false),
+                buildMapCell(4L, 1, 0, "2-1", "parking", "available", null, false)
         );
         when(parkingLotService.getById(1L)).thenReturn(lot);
         when(cellRepository.findByParkingLot(lot)).thenReturn(cells);
