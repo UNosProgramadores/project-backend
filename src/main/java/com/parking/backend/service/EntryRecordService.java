@@ -194,18 +194,19 @@ public class EntryRecordService {
     @Transactional
     public VehicleExitResponse registerExit(VehicleExitRequest request) {
 
-        Vehicle vehicle;
+        Vehicle vehicle = null;
+        String[] values = { request.getPlate(), request.getBikeRegistration() };
 
-        if (request.getPlate() != null && !request.getPlate().isBlank()) {
-            vehicle = vehicleRepository.findByPlate(request.getPlate())
-                    .orElseThrow(() -> new RuntimeException("Vehículo no encontrado"));
+        for (String v : values) {
+            if (v == null || v.isBlank()) continue;
+            vehicle = vehicleRepository.findByPlate(v).orElse(null);
+            if (vehicle != null) break;
+            vehicle = vehicleRepository.findByBikeRegistration(v).orElse(null);
+            if (vehicle != null) break;
+        }
 
-        } else if (request.getBikeRegistration() != null && !request.getBikeRegistration().isBlank()) {
-            vehicle = vehicleRepository.findByBikeRegistration(request.getBikeRegistration())
-                    .orElseThrow(() -> new RuntimeException("Vehículo no encontrado"));
-
-        } else {
-            throw new RuntimeException("Placa o registro de bicicleta es requerido");
+        if (vehicle == null) {
+            throw new RuntimeException("Vehículo no encontrado");
         }
 
         EntryRecord record = entryRecordRepository.findByVehicleAndStatus(vehicle, "active")

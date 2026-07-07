@@ -11,6 +11,8 @@ import com.parking.backend.entity.ParkingLot;
 import com.parking.backend.service.CellService;
 import com.parking.backend.service.EntryRecordService;
 import com.parking.backend.service.ParkingLotService;
+import com.parking.backend.dto.InvoiceResponse;
+import com.parking.backend.repository.InvoiceRepository;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,13 +27,16 @@ public class ParkingLotController {
     private final ParkingLotService parkingLotService;
     private final EntryRecordService entryRecordService;
     private final CellService cellService;
+    private final InvoiceRepository invoiceRepository;
 
     public ParkingLotController(ParkingLotService parkingLotService,
                                 EntryRecordService entryRecordService,
-                                CellService cellService) {
+                                CellService cellService,
+                                InvoiceRepository invoiceRepository) {
         this.parkingLotService = parkingLotService;
         this.entryRecordService = entryRecordService;
         this.cellService = cellService;
+        this.invoiceRepository = invoiceRepository;
     }
 
     @GetMapping
@@ -73,6 +78,15 @@ public class ParkingLotController {
     @GetMapping("/{parkingLotId}/active-entries")
     public ResponseEntity<List<ActiveEntryResponse>> getActiveEntries(@PathVariable Long parkingLotId) {
         return ResponseEntity.ok(entryRecordService.getActiveEntries(parkingLotId));
+    }
+
+    @GetMapping("/{parkingLotId}/invoices")
+    public ResponseEntity<List<InvoiceResponse>> getInvoices(@PathVariable Long parkingLotId) {
+        return ResponseEntity.ok(
+                invoiceRepository.findByParkingLotId(parkingLotId)
+                        .stream()
+                        .map(InvoiceResponse::fromEntity)
+                        .toList());
     }
 
     @PostMapping("/{parkingLotId}/entry")
