@@ -124,15 +124,15 @@ public class ParkingLotService {
             }
         }
 
-        if (newRows > oldRows || newCols > oldCols) {
+        if (newRows > oldRows || newCols > oldCols || existing.size() < newRows * newCols) {
             Set<String> existingPos = existing.stream()
                     .map(c -> c.getRow() + "," + c.getCol())
                     .collect(Collectors.toSet());
             List<Cell> newCells = new ArrayList<>();
-            for (int r = 1; r <= newRows; r++) {
-                for (int c = 1; c <= newCols; c++) {
+            for (int r = 0; r < newRows; r++) {
+                for (int c = 0; c < newCols; c++) {
                     if (!existingPos.contains(r + "," + c)) {
-                        newCells.add(createCell(lot, r, c));
+                        newCells.add(createCell(lot, r + 1, c + 1));
                     }
                 }
             }
@@ -143,8 +143,8 @@ public class ParkingLotService {
     private Cell createCell(ParkingLot lot, int row, int col) {
         Cell cell = new Cell();
         cell.setParkingLot(lot);
-        cell.setRow(row);
-        cell.setCol(col);
+        cell.setRow(row - 1);
+        cell.setCol(col - 1);
         cell.setCode(row + "-" + col);
         cell.setCellType("parking");
         cell.setStatus("available");
