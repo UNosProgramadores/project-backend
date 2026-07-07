@@ -248,7 +248,7 @@ class EntryRecordServiceTest {
                 .thenReturn(Optional.of(activeRecord));
         when(userRepository.findByUsername("lgomez")).thenReturn(Optional.of(staffUser));
         when(rateRepository.findByParkingLotAndVehicleTypeAndActive(parkingLot, carType, true))
-                .thenReturn(Optional.of(rate));
+                .thenReturn(List.of(rate));
         when(paymentRepository.save(any(Payment.class))).thenAnswer(inv -> inv.getArgument(0));
         when(invoiceRepository.save(any(Invoice.class))).thenAnswer(inv -> {
             Invoice invEntity = inv.getArgument(0);
@@ -306,7 +306,7 @@ class EntryRecordServiceTest {
                 .thenReturn(Optional.of(activeRecord));
         when(userRepository.findByUsername("lgomez")).thenReturn(Optional.of(staffUser));
         when(rateRepository.findByParkingLotAndVehicleTypeAndActive(parkingLot, carType, true))
-                .thenReturn(Optional.of(rate));
+                .thenReturn(List.of(rate));
         when(paymentRepository.save(any(Payment.class))).thenAnswer(inv -> inv.getArgument(0));
         when(invoiceRepository.save(any(Invoice.class))).thenAnswer(inv -> {
             Invoice invEntity = inv.getArgument(0);
@@ -563,7 +563,7 @@ class EntryRecordServiceTest {
                 .thenReturn(Optional.of(activeRecord));
         when(userRepository.findByUsername("lgomez")).thenReturn(Optional.of(staffUser));
         when(rateRepository.findByParkingLotAndVehicleTypeAndActive(parkingLot, carType, true))
-                .thenReturn(Optional.of(rate));
+                .thenReturn(List.of(rate));
         when(paymentRepository.save(any(Payment.class))).thenAnswer(inv -> {
             Payment p = inv.getArgument(0);
             p.setId(100L);
@@ -626,7 +626,7 @@ class EntryRecordServiceTest {
                 .thenReturn(Optional.of(activeRecord));
         when(userRepository.findByUsername("lgomez")).thenReturn(Optional.of(staffUser));
         when(rateRepository.findByParkingLotAndVehicleTypeAndActive(parkingLot, bike.getVehicleType(), true))
-                .thenReturn(Optional.of(rate));
+                .thenReturn(List.of(rate));
         when(paymentRepository.save(any(Payment.class))).thenAnswer(inv -> {
             Payment p = inv.getArgument(0);
             p.setId(200L);
@@ -717,7 +717,7 @@ class EntryRecordServiceTest {
                 .thenReturn(Optional.of(activeRecord));
         when(userRepository.findByUsername("lgomez")).thenReturn(Optional.of(staffUser));
         when(rateRepository.findByParkingLotAndVehicleTypeAndActive(parkingLot, carType, true))
-                .thenReturn(Optional.of(rate));
+                .thenReturn(List.of(rate));
         when(discountService.calculateDiscount(eq(parkingLot), eq(customerOwner), any()))
                 .thenReturn(new BigDecimal("36"));
         when(paymentRepository.save(any(Payment.class))).thenAnswer(inv -> inv.getArgument(0));
@@ -739,5 +739,232 @@ class EntryRecordServiceTest {
         assertEquals(500L, response.getInvoiceId());
 
         verify(discountService, times(1)).calculateDiscount(eq(parkingLot), eq(customerOwner), any());
+    }
+
+    // ──────────────────────────────────────────────
+    // Flat-rate threshold tests (a-f)
+    // ──────────────────────────────────────────────
+
+    @Test
+    @DisplayName("(a) duration < 360 min with both rates → per_minute * duration")
+    void exitDurationLessThan360UsesPerMinute() {
+        EntryRecord activeRecord = new EntryRecord();
+        activeRecord.setId(10L);
+        activeRecord.setVehicle(car);
+        activeRecord.setCell(availableCell);
+        activeRecord.setEntryTime(java.time.LocalDateTime.now().minusMinutes(120));
+        activeRecord.setStatus("active");
+
+        Rate perMinute = new Rate();
+        perMinute.setId(1L);
+        perMinute.setParkingLot(parkingLot);
+        perMinute.setVehicleType(carType);
+        perMinute.setRateType("per_minute");
+        perMinute.setCost(new BigDecimal("2"));
+        perMinute.setActive(true);
+
+        Rate flat = new Rate();
+        flat.setId(2L);
+        flat.setParkingLot(parkingLot);
+        flat.setVehicleType(carType);
+        flat.setRateType("flat");
+        flat.setCost(new BigDecimal("360"));
+        flat.setActive(true);
+
+        // flat cost 360 vs 120 min * 2 = 240; flat would be more expensive,
+        // but the rule says < 360 → per_minute regardless
+        when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
+        when(entryRecordRepository.findByVehicleAndStatus(car, "active"))
+                .thenReturn(Optional.of(activeRecord));
+        when(userRepository.findByUsername("lgomez")).thenReturn(Optional.of(staffUser));
+        when(rateRepository.findByParkingLotAndVehicleTypeAndActive(parkingLot, carType, true))
+                .thenReturn(List.of(perMinute, flat));
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(invoiceRepository.save(any(Invoice.class))).thenAnswer(inv -> {
+            Invoice invEntity = inv.getArgument(0);
+            invEntity.setId(999L);
+            return invEntity;
+        });
+
+        var response = entryRecordService.registerExit(exitRequest);
+
+        assertEquals(120, response.getDuration());
+        assertEquals(new BigDecimal("240"), response.getSubtotal());
+    }
+
+    @Test
+    @DisplayName("(b) duration >= 360 min with both rates → flat cost")
+    void exitDurationAtLeast360UsesFlat() {
+        EntryRecord activeRecord = new EntryRecord();
+        activeRecord.setId(11L);
+        activeRecord.setVehicle(car);
+        activeRecord.setCell(availableCell);
+        activeRecord.setEntryTime(java.time.LocalDateTime.now().minusMinutes(400));
+        activeRecord.setStatus("active");
+
+        Rate perMinute = new Rate();
+        perMinute.setId(1L);
+        perMinute.setParkingLot(parkingLot);
+        perMinute.setVehicleType(carType);
+        perMinute.setRateType("per_minute");
+        perMinute.setCost(new BigDecimal("2"));
+        perMinute.setActive(true);
+
+        Rate flat = new Rate();
+        flat.setId(2L);
+        flat.setParkingLot(parkingLot);
+        flat.setVehicleType(carType);
+        flat.setRateType("flat");
+        flat.setCost(new BigDecimal("360"));
+        flat.setActive(true);
+
+        // 400 min * 2 = 800 if per_minute, but flat = 360 is cheaper → business rule applies
+        when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
+        when(entryRecordRepository.findByVehicleAndStatus(car, "active"))
+                .thenReturn(Optional.of(activeRecord));
+        when(userRepository.findByUsername("lgomez")).thenReturn(Optional.of(staffUser));
+        when(rateRepository.findByParkingLotAndVehicleTypeAndActive(parkingLot, carType, true))
+                .thenReturn(List.of(perMinute, flat));
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(invoiceRepository.save(any(Invoice.class))).thenAnswer(inv -> {
+            Invoice invEntity = inv.getArgument(0);
+            invEntity.setId(999L);
+            return invEntity;
+        });
+
+        var response = entryRecordService.registerExit(exitRequest);
+
+        assertEquals(400, response.getDuration());
+        assertEquals(new BigDecimal("360"), response.getSubtotal());
+    }
+
+    @Test
+    @DisplayName("(c) duration == 360 min exactly → flat cost (>= threshold)")
+    void exitDurationExactly360UsesFlat() {
+        EntryRecord activeRecord = new EntryRecord();
+        activeRecord.setId(12L);
+        activeRecord.setVehicle(car);
+        activeRecord.setCell(availableCell);
+        activeRecord.setEntryTime(java.time.LocalDateTime.now().minusMinutes(360));
+        activeRecord.setStatus("active");
+
+        Rate perMinute = new Rate();
+        perMinute.setId(1L);
+        perMinute.setParkingLot(parkingLot);
+        perMinute.setVehicleType(carType);
+        perMinute.setRateType("per_minute");
+        perMinute.setCost(new BigDecimal("2"));
+        perMinute.setActive(true);
+
+        Rate flat = new Rate();
+        flat.setId(2L);
+        flat.setParkingLot(parkingLot);
+        flat.setVehicleType(carType);
+        flat.setRateType("flat");
+        flat.setCost(new BigDecimal("360"));
+        flat.setActive(true);
+
+        when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
+        when(entryRecordRepository.findByVehicleAndStatus(car, "active"))
+                .thenReturn(Optional.of(activeRecord));
+        when(userRepository.findByUsername("lgomez")).thenReturn(Optional.of(staffUser));
+        when(rateRepository.findByParkingLotAndVehicleTypeAndActive(parkingLot, carType, true))
+                .thenReturn(List.of(perMinute, flat));
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(invoiceRepository.save(any(Invoice.class))).thenAnswer(inv -> {
+            Invoice invEntity = inv.getArgument(0);
+            invEntity.setId(999L);
+            return invEntity;
+        });
+
+        var response = entryRecordService.registerExit(exitRequest);
+
+        assertEquals(360, response.getDuration());
+        assertEquals(new BigDecimal("360"), response.getSubtotal(),
+                "Exactly 360 min should apply flat (>=)");
+    }
+
+    @Test
+    @DisplayName("(d) only per_minute rate, long duration → per_minute * duration (no flat fallback)")
+    void exitOnlyPerMinuteLongDurationUsesPerMinute() {
+        EntryRecord activeRecord = new EntryRecord();
+        activeRecord.setId(13L);
+        activeRecord.setVehicle(car);
+        activeRecord.setCell(availableCell);
+        activeRecord.setEntryTime(java.time.LocalDateTime.now().minusMinutes(500));
+        activeRecord.setStatus("active");
+
+        Rate perMinute = new Rate();
+        perMinute.setId(1L);
+        perMinute.setParkingLot(parkingLot);
+        perMinute.setVehicleType(carType);
+        perMinute.setRateType("per_minute");
+        perMinute.setCost(new BigDecimal("2"));
+        perMinute.setActive(true);
+
+        when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
+        when(entryRecordRepository.findByVehicleAndStatus(car, "active"))
+                .thenReturn(Optional.of(activeRecord));
+        when(userRepository.findByUsername("lgomez")).thenReturn(Optional.of(staffUser));
+        when(rateRepository.findByParkingLotAndVehicleTypeAndActive(parkingLot, carType, true))
+                .thenReturn(List.of(perMinute));
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(invoiceRepository.save(any(Invoice.class))).thenAnswer(inv -> {
+            Invoice invEntity = inv.getArgument(0);
+            invEntity.setId(999L);
+            return invEntity;
+        });
+
+        var response = entryRecordService.registerExit(exitRequest);
+
+        assertEquals(500, response.getDuration());
+        assertEquals(new BigDecimal("1000"), response.getSubtotal());
+    }
+
+    @Test
+    @DisplayName("(f) original bug scenario: two active rates no longer throws unique result")
+    void exitWithBothActiveRatesDoesNotThrow() {
+        EntryRecord activeRecord = new EntryRecord();
+        activeRecord.setId(14L);
+        activeRecord.setVehicle(car);
+        activeRecord.setCell(availableCell);
+        activeRecord.setEntryTime(java.time.LocalDateTime.now().minusMinutes(180));
+        activeRecord.setStatus("active");
+
+        Rate perMinute = new Rate();
+        perMinute.setId(1L);
+        perMinute.setParkingLot(parkingLot);
+        perMinute.setVehicleType(carType);
+        perMinute.setRateType("per_minute");
+        perMinute.setCost(new BigDecimal("2"));
+        perMinute.setActive(true);
+
+        Rate flat = new Rate();
+        flat.setId(2L);
+        flat.setParkingLot(parkingLot);
+        flat.setVehicleType(carType);
+        flat.setRateType("flat");
+        flat.setCost(new BigDecimal("360"));
+        flat.setActive(true);
+
+        when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
+        when(entryRecordRepository.findByVehicleAndStatus(car, "active"))
+                .thenReturn(Optional.of(activeRecord));
+        when(userRepository.findByUsername("lgomez")).thenReturn(Optional.of(staffUser));
+        when(rateRepository.findByParkingLotAndVehicleTypeAndActive(parkingLot, carType, true))
+                .thenReturn(List.of(perMinute, flat));
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(invoiceRepository.save(any(Invoice.class))).thenAnswer(inv -> {
+            Invoice invEntity = inv.getArgument(0);
+            invEntity.setId(999L);
+            return invEntity;
+        });
+
+        assertDoesNotThrow(() -> {
+            var response = entryRecordService.registerExit(exitRequest);
+            assertNotNull(response);
+            assertEquals(180, response.getDuration());
+            assertEquals(new BigDecimal("360"), response.getSubtotal());
+        });
     }
 }
