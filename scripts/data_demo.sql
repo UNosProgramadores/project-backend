@@ -83,23 +83,48 @@ INSERT INTO cell (id, parking_lot_id, row, col, code, cell_type, status, vehicle
 (4,  1, 0, 3, 'T-03', 'transit', 'available', NULL, false),
 (5,  1, 0, 4, 'T-04', 'transit', 'available', NULL, false),
 -- Row 1
-(6,  1, 1, 0, 'C-10', 'parking', 'occupied',  1, false),
+(6,  1, 1, 0, 'C-10', 'parking', 'available', 1, false),
 (7,  1, 1, 1, 'C-11', 'parking', 'available', 1, false),
-(8,  1, 1, 2, 'M-12', 'parking', 'occupied',  2, false),
+(8,  1, 1, 2, 'M-12', 'parking', 'available', 2, false),
 (9,  1, 1, 3, 'M-13', 'parking', 'available', 2, false),
 (10, 1, 1, 4, 'B-14', 'parking', 'available', 3, false),
 -- Row 2
 (11, 1, 2, 0, 'C-20', 'parking', 'available', 1, false),
-(12, 1, 2, 1, 'C-21', 'parking', 'occupied',  1, false),
+(12, 1, 2, 1, 'C-21', 'parking', 'available', 1, false),
 (13, 1, 2, 2, 'M-22', 'parking', 'available', 2, false),
-(14, 1, 2, 3, 'M-23', 'parking', 'occupied',  2, false),
-(15, 1, 2, 4, 'B-24', 'parking', 'occupied',  3, false),
+(14, 1, 2, 3, 'M-23', 'parking', 'available', 2, false),
+(15, 1, 2, 4, 'B-24', 'parking', 'available', 3, false),
 -- Row 3
-(16, 1, 3, 0, 'C-30', 'parking', 'occupied',  1, true),  -- reserved for staff
+(16, 1, 3, 0, 'C-30', 'parking', 'available', 1, true),  -- reserved for staff
 (17, 1, 3, 1, 'C-31', 'parking', 'available', 1, false),
 (18, 1, 3, 2, 'M-32', 'parking', 'available', 2, false),
 (19, 1, 3, 3, 'M-33', 'parking', 'available', 2, false),
 (20, 1, 3, 4, 'B-34', 'parking', 'available', 3, false);
+
+
+-- ============================================================
+-- CELL — parking lot 2 (3 rows x 4 cols = 12 cells)
+-- Row 0:           transit lanes
+-- Rows 1-2 col 0-1: car cells       (4 cells)
+-- Rows 1-2 col 2:   motorcycle cells (2 cells)
+-- Rows 1-2 col 3:   bicycle cells    (2 cells)
+-- ============================================================
+INSERT INTO cell (id, parking_lot_id, row, col, code, cell_type, status, vehicle_type_id, reserved_for_staff) VALUES
+-- Row 0: transit
+(21, 2, 0, 0, 'T-00', 'transit', 'available', NULL, false),
+(22, 2, 0, 1, 'T-01', 'transit', 'available', NULL, false),
+(23, 2, 0, 2, 'T-02', 'transit', 'available', NULL, false),
+(24, 2, 0, 3, 'T-03', 'transit', 'available', NULL, false),
+-- Row 1
+(25, 2, 1, 0, 'C-10', 'parking', 'available', 1, false),
+(26, 2, 1, 1, 'C-11', 'parking', 'available', 1, false),
+(27, 2, 1, 2, 'M-12', 'parking', 'available', 2, false),
+(28, 2, 1, 3, 'B-13', 'parking', 'available', 3, false),
+-- Row 2
+(29, 2, 2, 0, 'C-20', 'parking', 'available', 1, false),
+(30, 2, 2, 1, 'C-21', 'parking', 'available', 1, false),
+(31, 2, 2, 2, 'M-22', 'parking', 'available', 2, false),
+(32, 2, 2, 3, 'B-23', 'parking', 'available', 3, false);
 
 
 -- ============================================================
@@ -115,7 +140,16 @@ INSERT INTO rate (id, parking_lot_id, vehicle_type_id, rate_type, cost, start_da
                                                                                                           (5, 1, 3, 'per_minute',   30.00, '2024-01-01 00:00:00', NULL,                   true),
                                                                                                           (6, 1, 3, 'flat',       2000.00, '2024-01-01 00:00:00', NULL,                   true),
 -- Historical rate — expired, demonstrates RF_08
-                                                                                                          (7, 1, 1, 'per_minute',  120.00, '2023-01-01 00:00:00', '2023-12-31 23:59:59', false);
+                                                                                                           (7, 1, 1, 'per_minute',  120.00, '2023-01-01 00:00:00', '2023-12-31 23:59:59', false);
+
+-- Lot 2 rates
+INSERT INTO rate (id, parking_lot_id, vehicle_type_id, rate_type, cost, start_date, end_date, active) VALUES
+                                                                                                           (8,  2, 1, 'per_minute',  130.00, '2024-01-01 00:00:00', NULL, true),
+                                                                                                           (9,  2, 1, 'flat',       7000.00, '2024-01-01 00:00:00', NULL, true),
+                                                                                                           (10, 2, 2, 'per_minute',   70.00, '2024-01-01 00:00:00', NULL, true),
+                                                                                                           (11, 2, 2, 'flat',       3500.00, '2024-01-01 00:00:00', NULL, true),
+                                                                                                           (12, 2, 3, 'per_minute',   25.00, '2024-01-01 00:00:00', NULL, true),
+                                                                                                           (13, 2, 3, 'flat',       1500.00, '2024-01-01 00:00:00', NULL, true);
 
 
 -- ============================================================
@@ -141,20 +175,23 @@ INSERT INTO entry_record (id, vehicle_id, cell_id, recorded_by, entry_time, exit
                                                                                                              (1, 1, 6,  3, '2024-05-10 08:30:00', '2024-05-10 10:15:00', 105,  'completed'),  -- car,        recorded by Laura (staff lot 1)
                                                                                                              (2, 3, 8,  3, '2024-05-10 09:00:00', '2024-05-10 09:45:00', 45,   'completed'),  -- motorcycle, recorded by Laura
                                                                                                              (3, 5, 15, 1, '2024-05-11 07:00:00', '2024-05-11 08:30:00', 90,   'completed'),  -- bicycle,    recorded by Carlos (admin lot 1)
-                                                                                                             (4, 2, 12, 3, '2024-05-12 14:00:00', '2024-05-12 17:30:00', 210,  'completed'),  -- car,        recorded by Laura
-                                                                                                             (5, 4, 14, 3, '2024-05-13 08:00:00', NULL,                  NULL, 'active'),     -- motorcycle, still inside
-                                                                                                             (6, 6, 16, 1, '2024-05-13 07:30:00', NULL,                  NULL, 'active');     -- bicycle (no owner), still inside
+                                                                                                              (4, 2, 12, 3, '2024-05-12 14:00:00', '2024-05-12 17:30:00', 210,  'completed'),  -- car,        recorded by Laura
+-- Lot 2 entries (all completed)
+                                                                                                              (5, 2, 26, 4, '2024-06-01 10:00:00', '2024-06-01 12:30:00', 150,  'completed'),  -- car,        recorded by Pedro (staff lot 2)
+                                                                                                              (6, 4, 31, 4, '2024-06-02 14:00:00', '2024-06-02 15:15:00', 75,   'completed');  -- motorcycle, recorded by Pedro
 
 
 -- ============================================================
 -- PAYMENT
--- entry_records 5 and 6 have no payment yet (vehicles still inside)
+-- One payment per completed entry_record
 -- ============================================================
 INSERT INTO payment (id, entry_record_id, subtotal, discount_percentage, discount_amount, total_paid, payment_method, payment_date, external_invoice_ref) VALUES
                                                                                                                                                               (1, 1, 15750.00, 20.00, 3150.00, 12600.00, 'cash', '2024-05-10 10:15:00', 'INV-STORE-0042'),  -- discount by external invoice (RF_15)
                                                                                                                                                               (2, 2,  3600.00,  0.00,    0.00,  3600.00, 'cash', '2024-05-10 09:45:00', NULL),              -- no discount
                                                                                                                                                               (3, 3,  2700.00, 10.00,  270.00,  2430.00, 'cash', '2024-05-11 08:30:00', NULL),              -- discount by visits (RF_15)
-                                                                                                                                                              (4, 4, 31500.00,  0.00,    0.00, 31500.00, 'cash', '2024-05-12 17:30:00', NULL);              -- no discount
+                                                                                                                                                               (4, 4, 31500.00,  0.00,    0.00, 31500.00, 'cash', '2024-05-12 17:30:00', NULL),              -- no discount
+                                                                                                                                                               (5, 5, 19500.00,  0.00,    0.00, 19500.00, 'card',  '2024-06-01 12:30:00', 'INV-STORE-0099'),  -- lot 2, no discount
+                                                                                                                                                               (6, 6,  5250.00,  0.00,    0.00,  5250.00, 'cash', '2024-06-02 15:15:00', NULL);               -- lot 2, no discount
 
 
 -- ============================================================
@@ -164,7 +201,9 @@ INSERT INTO invoice (id, payment_id, invoice_number, issued_at) VALUES
                                                                     (1, 1, 'INV-2024-0001', '2024-05-10 10:15:00'),
                                                                     (2, 2, 'INV-2024-0002', '2024-05-10 09:45:00'),
                                                                     (3, 3, 'INV-2024-0003', '2024-05-11 08:30:00'),
-                                                                    (4, 4, 'INV-2024-0004', '2024-05-12 17:30:00');
+                                                                     (4, 4, 'INV-2024-0004', '2024-05-12 17:30:00'),
+                                                                     (5, 5, 'INV-2024-0005', '2024-06-01 12:30:00'),
+                                                                     (6, 6, 'INV-2024-0006', '2024-06-02 15:15:00');
 
 -- ============================================================
 -- RESET IDENTITY SEQUENCES
