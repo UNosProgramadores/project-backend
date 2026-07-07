@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -77,6 +78,7 @@ class RateServiceTest {
 
         when(parkingLotService.getById(1L)).thenReturn(lot);
         when(vehicleTypeRepository.findById(1L)).thenReturn(Optional.of(vt));
+        when(repository.findByParkingLotAndVehicleTypeAndActive(any(), any(), any())).thenReturn(List.of());
         when(repository.save(any(Rate.class))).thenAnswer(inv -> inv.getArgument(0));
 
         Rate result = rateService.create(1L, req);
@@ -91,6 +93,54 @@ class RateServiceTest {
     }
 
     @Test
+    @DisplayName("create deactivates existing active rate of same type before saving new one")
+    void createDeactivatesExistingRateOfSameType() {
+        ParkingLot lot = buildLot();
+        VehicleType vt = buildVehicleType();
+        Rate existingActive = buildRate(1L, lot, vt);
+        RateRequest req = buildRequest();
+
+        when(parkingLotService.getById(1L)).thenReturn(lot);
+        when(vehicleTypeRepository.findById(1L)).thenReturn(Optional.of(vt));
+        when(repository.findByParkingLotAndVehicleTypeAndActive(lot, vt, true))
+                .thenReturn(List.of(existingActive));
+        when(repository.save(any(Rate.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Rate result = rateService.create(1L, req);
+
+        assertFalse(existingActive.getActive(), "Existing rate should be deactivated");
+        assertNotNull(existingActive.getEndDate(), "Existing rate should have end date");
+
+        assertTrue(result.getActive());
+        assertEquals(new BigDecimal("150"), result.getCost());
+        assertNull(result.getEndDate());
+        verify(repository, times(2)).save(any(Rate.class));
+    }
+
+    @Test
+    @DisplayName("create does not deactivate rates of different type")
+    void createDoesNotDeactivateDifferentRateType() {
+        ParkingLot lot = buildLot();
+        VehicleType vt = buildVehicleType();
+        Rate existingFlat = buildRate(1L, lot, vt);
+        existingFlat.setRateType("flat");
+        RateRequest req = buildRequest(); // rateType = "per_minute"
+
+        when(parkingLotService.getById(1L)).thenReturn(lot);
+        when(vehicleTypeRepository.findById(1L)).thenReturn(Optional.of(vt));
+        when(repository.findByParkingLotAndVehicleTypeAndActive(lot, vt, true))
+                .thenReturn(List.of(existingFlat));
+        when(repository.save(any(Rate.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        Rate result = rateService.create(1L, req);
+
+        assertTrue(existingFlat.getActive(), "Flat rate should remain active");
+        assertNull(existingFlat.getEndDate(), "Flat rate should not have end date");
+        assertTrue(result.getActive());
+        verify(repository, times(1)).save(any(Rate.class));
+    }
+
+    @Test
     @DisplayName("update versiones: cierra registro anterior y crea uno nuevo")
     void updateVersions() {
         ParkingLot lot = buildLot();
@@ -100,6 +150,7 @@ class RateServiceTest {
 
         when(repository.findById(1L)).thenReturn(Optional.of(existing));
         when(vehicleTypeRepository.findById(1L)).thenReturn(Optional.of(vt));
+        when(repository.findByParkingLotAndVehicleTypeAndActive(any(), any(), any())).thenReturn(List.of());
         when(repository.save(any(Rate.class))).thenAnswer(inv -> inv.getArgument(0));
 
         Rate result = rateService.update(1L, 1L, req);

@@ -37,6 +37,9 @@ import java.util.UUID;
 @Service
 public class EntryRecordService {
 
+    private static final int FLAT_RATE_THRESHOLD_MINUTES = 360;
+    // flat-rate threshold: stays >= 6 hours (360 min) charge the flat amount instead of per-minute
+
     private final ParkingLotRepository parkingLotRepository;
     private final EntryRecordRepository entryRecordRepository;
     private final VehicleRepository vehicleRepository;
@@ -228,13 +231,10 @@ public class EntryRecordService {
         entryRecordRepository.save(record);
 
         ParkingLot parkingLot = cell.getParkingLot();
-        Rate rate = rateRepository
-                .findByParkingLotAndVehicleTypeAndActive(parkingLot, vehicle.getVehicleType(), true)
-                .orElseThrow(() -> new RuntimeException("No se encontró una tarifa activa para este tipo de vehículo"));
+        List<Rate> activeRates = rateRepository
+                .findByParkingLotAndVehicleTypeAndActive(parkingLot, vehicle.getVehicleType(), true);
 
-        BigDecimal subtotal = "per_minute".equals(rate.getRateType())
-                ? rate.getCost().multiply(BigDecimal.valueOf(duration))
-                : rate.getCost();
+        BigDecimal subtotal = calculateSubtotal(duration, activeRates);
 
         User owner = vehicle.getOwner();
         BigDecimal discountAmount = (owner != null)
@@ -296,6 +296,30 @@ public class EntryRecordService {
                     return r;
                 })
                 .toList();
+    }
+
+    private BigDecimal calculateSubtotal(int duration, List<Rate> activeRates) {
+        if (activeRates.isEmpty()) {
+            throw new RuntimeException("No se encontró una tarifa activa para este tipo de vehículo");
+        }
+
+        Rate flatRate = activeRates.stream()
+                .filter(r -> "flat".equals(r.getRateType()))
+                .findFirst().orElse(null);
+        Rate perMinuteRate = activeRates.stream()
+                .filter(r -> "per_minute".equals(r.getRateType()))
+                .findFirst().orElse(null);
+
+        if (flatRate != null && duration >= FLAT_RATE_THRESHOLD_MINUTES) {
+            return flatRate.getCost();
+        }
+        if (perMinuteRate != null) {
+            return perMinuteRate.getCost().multiply(BigDecimal.valueOf(duration));
+        }
+        if (flatRate != null) {
+            return flatRate.getCost();
+        }
+        throw new RuntimeException("No se encontró una tarifa activa para este tipo de vehículo");
     }
 
     private User getCurrentUser() {
