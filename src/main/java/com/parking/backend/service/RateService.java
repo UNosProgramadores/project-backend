@@ -44,6 +44,7 @@ public class RateService {
     @Transactional
     public Rate create(Long parkingLotId, RateRequest request) {
         ParkingLot lot = parkingLotService.getById(parkingLotId);
+        deactivateExistingRateOfType(lot, request);
         Rate rate = new Rate();
         applyRequest(rate, request, lot);
         rate.setStartDate(LocalDateTime.now());
@@ -58,10 +59,26 @@ public class RateService {
         existing.setEndDate(LocalDateTime.now());
         repository.save(existing);
 
+        deactivateExistingRateOfType(existing.getParkingLot(), request);
+
         Rate rate = new Rate();
         applyRequest(rate, request, existing.getParkingLot());
         rate.setStartDate(LocalDateTime.now());
         return repository.save(rate);
+    }
+
+    private void deactivateExistingRateOfType(ParkingLot lot, RateRequest request) {
+        vehicleTypeRepository.findById(request.getVehicleTypeId())
+                .ifPresent(vt -> {
+                    List<Rate> existing = repository.findByParkingLotAndVehicleTypeAndActive(lot, vt, true);
+                    existing.stream()
+                            .filter(r -> r.getRateType().equals(request.getRateType()))
+                            .forEach(r -> {
+                                r.setActive(false);
+                                r.setEndDate(LocalDateTime.now());
+                                repository.save(r);
+                            });
+                });
     }
 
     @Transactional
