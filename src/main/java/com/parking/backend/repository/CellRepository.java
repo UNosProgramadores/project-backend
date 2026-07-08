@@ -13,7 +13,7 @@ import java.util.Optional;
 public interface CellRepository extends JpaRepository<Cell, Long> {
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    Optional<Cell> findFirstByParkingLotAndVehicleTypeAndStatus(
+    Optional<Cell> findFirstByParkingLotAndVehicleTypeAndStatusAndActiveTrue(
             ParkingLot parkingLot,
             VehicleType vehicleType,
             String status
@@ -22,12 +22,12 @@ public interface CellRepository extends JpaRepository<Cell, Long> {
     List<Cell> findByParkingLot(ParkingLot parkingLot);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
-    Optional<Cell> findFirstByParkingLotAndVehicleTypeAndStatusAndReservedForStaff(
+    Optional<Cell> findFirstByParkingLotAndVehicleTypeAndStatusAndReservedForStaffAndActiveTrue(
             ParkingLot parkingLot,
             VehicleType vehicleType,
             String status,
             Boolean reservedForStaff
     );
 
-    Optional<Cell> findByIdAndParkingLot(Long id, ParkingLot parkingLot);
+    Optional<Cell> findByIdAndParkingLotAndActiveTrue(Long id, ParkingLot parkingLot);
 }

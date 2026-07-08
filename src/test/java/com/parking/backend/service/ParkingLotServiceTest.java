@@ -108,8 +108,10 @@ class ParkingLotServiceTest {
         Cell first = generated.getFirst();
         assertEquals(0, first.getRow().intValue());
         assertEquals(0, first.getCol().intValue());
+        assertEquals("0-0", first.getCode());
         assertEquals("parking", first.getCellType());
         assertEquals("available", first.getStatus());
+        assertTrue(first.getActive());
     }
 
     // ── Update ────────────────────────────────────────────────

@@ -1,5 +1,6 @@
 package com.parking.backend.dto;
 
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotNull;
 
 public class VehicleEntryRequest {
@@ -9,10 +10,16 @@ public class VehicleEntryRequest {
 
     @NotNull(message = "El tipo de vehículo es requerido")
     private Long vehicleTypeId;
+
     private String plate;
     private String bikeRegistration;
     private String ownerDocument;
     private Long cellId;
+
+    @AssertTrue(message = "Debe proporcionar placa (para vehículos motorizados) o registro de bicicleta")
+    private boolean isPlateOrBikeRegistrationProvided() {
+        return (plate != null && !plate.isBlank()) || (bikeRegistration != null && !bikeRegistration.isBlank());
+    }
 
     public Long getParkingLotId() {
         return parkingLotId;

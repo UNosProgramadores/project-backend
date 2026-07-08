@@ -75,31 +75,31 @@ INSERT INTO vehicle (id, vehicle_type_id, plate, bike_registration, owner_id, br
 -- Rows 1-3 col 4:   bicycle cells (3 cells)
 -- Row 3 col 0:      reserved for staff
 -- ============================================================
-INSERT INTO cell (id, parking_lot_id, row, col, code, cell_type, status, vehicle_type_id, reserved_for_staff) VALUES
+INSERT INTO cell (id, parking_lot_id, row, col, code, cell_type, status, vehicle_type_id, reserved_for_staff, active) VALUES
 -- Row 0: transit
-(1,  1, 0, 0, 'T-00', 'transit', 'available', NULL, false),
-(2,  1, 0, 1, 'T-01', 'transit', 'available', NULL, false),
-(3,  1, 0, 2, 'T-02', 'transit', 'available', NULL, false),
-(4,  1, 0, 3, 'T-03', 'transit', 'available', NULL, false),
-(5,  1, 0, 4, 'T-04', 'transit', 'available', NULL, false),
+(1,  1, 0, 0, '0-0', 'transit', 'available', NULL, false, true),
+(2,  1, 0, 1, '0-1', 'transit', 'available', NULL, false, true),
+(3,  1, 0, 2, '0-2', 'transit', 'available', NULL, false, true),
+(4,  1, 0, 3, '0-3', 'transit', 'available', NULL, false, true),
+(5,  1, 0, 4, '0-4', 'transit', 'available', NULL, false, true),
 -- Row 1
-(6,  1, 1, 0, 'C-10', 'parking', 'available', 1, false),
-(7,  1, 1, 1, 'C-11', 'parking', 'available', 1, false),
-(8,  1, 1, 2, 'M-12', 'parking', 'available', 2, false),
-(9,  1, 1, 3, 'M-13', 'parking', 'available', 2, false),
-(10, 1, 1, 4, 'B-14', 'parking', 'available', 3, false),
+(6,  1, 1, 0, '1-0', 'parking', 'available', 1, false, true),
+(7,  1, 1, 1, '1-1', 'parking', 'available', 1, false, true),
+(8,  1, 1, 2, '1-2', 'parking', 'available', 2, false, true),
+(9,  1, 1, 3, '1-3', 'parking', 'available', 2, false, true),
+(10, 1, 1, 4, '1-4', 'parking', 'available', 3, false, true),
 -- Row 2
-(11, 1, 2, 0, 'C-20', 'parking', 'available', 1, false),
-(12, 1, 2, 1, 'C-21', 'parking', 'available', 1, false),
-(13, 1, 2, 2, 'M-22', 'parking', 'available', 2, false),
-(14, 1, 2, 3, 'M-23', 'parking', 'available', 2, false),
-(15, 1, 2, 4, 'B-24', 'parking', 'available', 3, false),
+(11, 1, 2, 0, '2-0', 'parking', 'available', 1, false, true),
+(12, 1, 2, 1, '2-1', 'parking', 'available', 1, false, true),
+(13, 1, 2, 2, '2-2', 'parking', 'available', 2, false, true),
+(14, 1, 2, 3, '2-3', 'parking', 'available', 2, false, true),
+(15, 1, 2, 4, '2-4', 'parking', 'available', 3, false, true),
 -- Row 3
-(16, 1, 3, 0, 'C-30', 'parking', 'available', 1, true),  -- reserved for staff
-(17, 1, 3, 1, 'C-31', 'parking', 'available', 1, false),
-(18, 1, 3, 2, 'M-32', 'parking', 'available', 2, false),
-(19, 1, 3, 3, 'M-33', 'parking', 'available', 2, false),
-(20, 1, 3, 4, 'B-34', 'parking', 'available', 3, false);
+(16, 1, 3, 0, '3-0', 'parking', 'available', 1, true, true),  -- reserved for staff
+(17, 1, 3, 1, '3-1', 'parking', 'available', 1, false, true),
+(18, 1, 3, 2, '3-2', 'parking', 'available', 2, false, true),
+(19, 1, 3, 3, '3-3', 'parking', 'available', 2, false, true),
+(20, 1, 3, 4, '3-4', 'parking', 'available', 3, false, true);
 
 
 -- ============================================================
@@ -109,22 +109,22 @@ INSERT INTO cell (id, parking_lot_id, row, col, code, cell_type, status, vehicle
 -- Rows 1-2 col 2:   motorcycle cells (2 cells)
 -- Rows 1-2 col 3:   bicycle cells    (2 cells)
 -- ============================================================
-INSERT INTO cell (id, parking_lot_id, row, col, code, cell_type, status, vehicle_type_id, reserved_for_staff) VALUES
+INSERT INTO cell (id, parking_lot_id, row, col, code, cell_type, status, vehicle_type_id, reserved_for_staff, active) VALUES
 -- Row 0: transit
-(21, 2, 0, 0, 'T-00', 'transit', 'available', NULL, false),
-(22, 2, 0, 1, 'T-01', 'transit', 'available', NULL, false),
-(23, 2, 0, 2, 'T-02', 'transit', 'available', NULL, false),
-(24, 2, 0, 3, 'T-03', 'transit', 'available', NULL, false),
+(21, 2, 0, 0, '0-0', 'transit', 'available', NULL, false, true),
+(22, 2, 0, 1, '0-1', 'transit', 'available', NULL, false, true),
+(23, 2, 0, 2, '0-2', 'transit', 'available', NULL, false, true),
+(24, 2, 0, 3, '0-3', 'transit', 'available', NULL, false, true),
 -- Row 1
-(25, 2, 1, 0, 'C-10', 'parking', 'available', 1, false),
-(26, 2, 1, 1, 'C-11', 'parking', 'available', 1, false),
-(27, 2, 1, 2, 'M-12', 'parking', 'available', 2, false),
-(28, 2, 1, 3, 'B-13', 'parking', 'available', 3, false),
+(25, 2, 1, 0, '1-0', 'parking', 'available', 1, false, true),
+(26, 2, 1, 1, '1-1', 'parking', 'available', 1, false, true),
+(27, 2, 1, 2, '1-2', 'parking', 'available', 2, false, true),
+(28, 2, 1, 3, '1-3', 'parking', 'available', 3, false, true),
 -- Row 2
-(29, 2, 2, 0, 'C-20', 'parking', 'available', 1, false),
-(30, 2, 2, 1, 'C-21', 'parking', 'available', 1, false),
-(31, 2, 2, 2, 'M-22', 'parking', 'available', 2, false),
-(32, 2, 2, 3, 'B-23', 'parking', 'available', 3, false);
+(29, 2, 2, 0, '2-0', 'parking', 'available', 1, false, true),
+(30, 2, 2, 1, '2-1', 'parking', 'available', 1, false, true),
+(31, 2, 2, 2, '2-2', 'parking', 'available', 2, false, true),
+(32, 2, 2, 3, '2-3', 'parking', 'available', 3, false, true);
 
 
 -- ============================================================

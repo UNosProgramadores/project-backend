@@ -156,7 +156,7 @@ class EntryRecordServiceTest {
         when(parkingLotRepository.findById(1L)).thenReturn(Optional.of(parkingLot));
         when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
         when(userRepository.findByUsername("lgomez")).thenReturn(Optional.of(staffUser));
-        when(cellRepository.findFirstByParkingLotAndVehicleTypeAndStatusAndReservedForStaff(
+        when(cellRepository.findFirstByParkingLotAndVehicleTypeAndStatusAndReservedForStaffAndActiveTrue(
                 parkingLot, carType, "available", false))
                 .thenReturn(Optional.of(availableCell));
         when(entryRecordRepository.save(any(EntryRecord.class)))
@@ -182,7 +182,7 @@ class EntryRecordServiceTest {
     void registerEntryWithBikeRegistrationSuccess() {
         when(parkingLotRepository.findById(1L)).thenReturn(Optional.of(parkingLot));
         when(vehicleRepository.findByBikeRegistration("BIKE-001")).thenReturn(Optional.of(bike));
-        when(cellRepository.findFirstByParkingLotAndVehicleTypeAndStatusAndReservedForStaff(
+        when(cellRepository.findFirstByParkingLotAndVehicleTypeAndStatusAndReservedForStaffAndActiveTrue(
                 parkingLot, bike.getVehicleType(), "available", false))
                 .thenReturn(Optional.of(availableCell));
         when(entryRecordRepository.save(any(EntryRecord.class)))
@@ -207,7 +207,7 @@ class EntryRecordServiceTest {
         when(parkingLotRepository.findById(1L)).thenReturn(Optional.of(parkingLot));
         when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
         when(userRepository.findByUsername("lgomez")).thenReturn(Optional.of(staffUser));
-        when(cellRepository.findFirstByParkingLotAndVehicleTypeAndStatusAndReservedForStaff(
+        when(cellRepository.findFirstByParkingLotAndVehicleTypeAndStatusAndReservedForStaffAndActiveTrue(
                 parkingLot, carType, "available", false))
                 .thenReturn(Optional.of(availableCell));
         when(entryRecordRepository.save(any(EntryRecord.class)))
@@ -338,7 +338,7 @@ class EntryRecordServiceTest {
         );
 
         assertEquals("El vehículo ya se encuentra dentro del parqueadero", exception.getMessage());
-        verify(cellRepository, never()).findFirstByParkingLotAndVehicleTypeAndStatusAndReservedForStaff(any(), any(), any(), any());
+        verify(cellRepository, never()).findFirstByParkingLotAndVehicleTypeAndStatusAndReservedForStaffAndActiveTrue(any(), any(), any(), any());
         verify(entryRecordRepository, never()).save(any());
     }
 
@@ -354,7 +354,7 @@ class EntryRecordServiceTest {
         when(parkingLotRepository.findById(1L)).thenReturn(Optional.of(parkingLot));
         when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
         when(userRepository.findByUsername("lgomez")).thenReturn(Optional.of(staffUser));
-        when(cellRepository.findByIdAndParkingLot(10L, parkingLot)).thenReturn(Optional.of(availableCell));
+        when(cellRepository.findByIdAndParkingLotAndActiveTrue(10L, parkingLot)).thenReturn(Optional.of(availableCell));
         when(entryRecordRepository.save(any(EntryRecord.class)))
                 .thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -367,7 +367,7 @@ class EntryRecordServiceTest {
 
         verify(cellRepository, times(1)).save(availableCell);
         assertEquals("occupied", availableCell.getStatus());
-        verify(cellRepository, never()).findFirstByParkingLotAndVehicleTypeAndStatusAndReservedForStaff(any(), any(), any(), any());
+        verify(cellRepository, never()).findFirstByParkingLotAndVehicleTypeAndStatusAndReservedForStaffAndActiveTrue(any(), any(), any(), any());
     }
 
     @Test
@@ -386,7 +386,7 @@ class EntryRecordServiceTest {
         );
 
         assertEquals("La asignación automática está deshabilitada. Se requiere un cellId.", exception.getMessage());
-        verify(cellRepository, never()).findByIdAndParkingLot(any(), any());
+        verify(cellRepository, never()).findByIdAndParkingLotAndActiveTrue(any(), any());
     }
 
     @Test
@@ -399,7 +399,7 @@ class EntryRecordServiceTest {
         when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
         when(entryRecordRepository.findByVehicleAndStatus(car, "active"))
                 .thenReturn(Optional.empty());
-        when(cellRepository.findByIdAndParkingLot(99L, parkingLot)).thenReturn(Optional.empty());
+        when(cellRepository.findByIdAndParkingLotAndActiveTrue(99L, parkingLot)).thenReturn(Optional.empty());
 
         RuntimeException exception = assertThrows(
                 RuntimeException.class,
@@ -422,7 +422,7 @@ class EntryRecordServiceTest {
         when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
         when(entryRecordRepository.findByVehicleAndStatus(car, "active"))
                 .thenReturn(Optional.empty());
-        when(cellRepository.findByIdAndParkingLot(10L, parkingLot)).thenReturn(Optional.of(availableCell));
+        when(cellRepository.findByIdAndParkingLotAndActiveTrue(10L, parkingLot)).thenReturn(Optional.of(availableCell));
 
         RuntimeException exception = assertThrows(
                 RuntimeException.class,
@@ -444,7 +444,7 @@ class EntryRecordServiceTest {
         when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
         when(entryRecordRepository.findByVehicleAndStatus(car, "active"))
                 .thenReturn(Optional.empty());
-        when(cellRepository.findByIdAndParkingLot(10L, parkingLot)).thenReturn(Optional.of(availableCell));
+        when(cellRepository.findByIdAndParkingLotAndActiveTrue(10L, parkingLot)).thenReturn(Optional.of(availableCell));
 
         RuntimeException exception = assertThrows(
                 RuntimeException.class,
@@ -470,7 +470,7 @@ class EntryRecordServiceTest {
         when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
         when(entryRecordRepository.findByVehicleAndStatus(car, "active"))
                 .thenReturn(Optional.empty());
-        when(cellRepository.findByIdAndParkingLot(10L, parkingLot)).thenReturn(Optional.of(availableCell));
+        when(cellRepository.findByIdAndParkingLotAndActiveTrue(10L, parkingLot)).thenReturn(Optional.of(availableCell));
 
         RuntimeException exception = assertThrows(
                 RuntimeException.class,
@@ -486,7 +486,7 @@ class EntryRecordServiceTest {
         when(parkingLotRepository.findById(1L)).thenReturn(Optional.of(parkingLot));
         when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
         when(userRepository.findByUsername("lgomez")).thenReturn(Optional.of(staffUser));
-        when(cellRepository.findFirstByParkingLotAndVehicleTypeAndStatusAndReservedForStaff(
+        when(cellRepository.findFirstByParkingLotAndVehicleTypeAndStatusAndReservedForStaffAndActiveTrue(
                 parkingLot, carType, "available", false))
                 .thenReturn(Optional.of(availableCell));
         when(entryRecordRepository.save(any(EntryRecord.class)))
@@ -497,7 +497,39 @@ class EntryRecordServiceTest {
         assertNotNull(result);
         assertEquals(availableCell, result.getCell());
 
-        verify(cellRepository).findFirstByParkingLotAndVehicleTypeAndStatusAndReservedForStaff(
+        verify(cellRepository).findFirstByParkingLotAndVehicleTypeAndStatusAndReservedForStaffAndActiveTrue(
+                parkingLot, carType, "available", false);
+    }
+
+    @Test
+    @DisplayName("Bug fix: Auto-assignment ignores inactive cells (active=false from shrink)")
+    void autoAssignmentExcludesInactiveCells() {
+        Cell inactiveCell = new Cell();
+        inactiveCell.setId(99L);
+        inactiveCell.setParkingLot(parkingLot);
+        inactiveCell.setRow(-1);
+        inactiveCell.setCol(-1);
+        inactiveCell.setActive(false);
+        inactiveCell.setVehicleType(carType);
+        inactiveCell.setStatus("available");
+        availableCell.setActive(true);
+
+        when(parkingLotRepository.findById(1L)).thenReturn(Optional.of(parkingLot));
+        when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
+        when(userRepository.findByUsername("lgomez")).thenReturn(Optional.of(staffUser));
+        when(cellRepository.findFirstByParkingLotAndVehicleTypeAndStatusAndReservedForStaffAndActiveTrue(
+                parkingLot, carType, "available", false))
+                .thenReturn(Optional.of(availableCell));
+        when(entryRecordRepository.save(any(EntryRecord.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        EntryRecord result = entryRecordService.registerEntry(plateRequest);
+
+        assertNotNull(result);
+        assertEquals(availableCell, result.getCell());
+        assertEquals(10L, result.getCell().getId(),
+                "Must pick the active cell (10L), not the inactive one (99L)");
+        verify(cellRepository).findFirstByParkingLotAndVehicleTypeAndStatusAndReservedForStaffAndActiveTrue(
                 parkingLot, carType, "available", false);
     }
 
@@ -659,7 +691,7 @@ class EntryRecordServiceTest {
         when(parkingLotRepository.findById(1L)).thenReturn(Optional.of(parkingLot));
         when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
         when(userRepository.findByUsername("lgomez")).thenReturn(Optional.of(staffUser));
-        when(cellRepository.findFirstByParkingLotAndVehicleTypeAndStatusAndReservedForStaff(
+        when(cellRepository.findFirstByParkingLotAndVehicleTypeAndStatusAndReservedForStaffAndActiveTrue(
                 parkingLot, carType, "available", false))
                 .thenReturn(Optional.of(availableCell));
         when(entryRecordRepository.save(any(EntryRecord.class)))

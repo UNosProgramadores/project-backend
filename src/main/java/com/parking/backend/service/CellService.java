@@ -47,7 +47,7 @@ public class CellService {
         }
 
         for (Cell cell : cells) {
-            if (cell.getRow() < 0 || cell.getCol() < 0) continue;
+            if (Boolean.FALSE.equals(cell.getActive()) || cell.getRow() < 0 || cell.getCol() < 0) continue;
             CellDto dto = new CellDto(
                     cell.getId(),
                     cell.getRow(),

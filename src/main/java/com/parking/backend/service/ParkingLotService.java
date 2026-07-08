@@ -117,6 +117,7 @@ public class ParkingLotService {
                 if (c.getRow() >= newRows || c.getCol() >= newCols) {
                     c.setRow(-1);
                     c.setCol(-1);
+                    c.setActive(false);
                 }
             }
             cellRepository.saveAll(existing);
@@ -143,10 +144,11 @@ public class ParkingLotService {
         cell.setParkingLot(lot);
         cell.setRow(row - 1);
         cell.setCol(col - 1);
-        cell.setCode(row + "-" + col);
+        cell.setCode(cell.getRow() + "-" + cell.getCol());
         cell.setCellType("parking");
         cell.setStatus("available");
         cell.setReservedForStaff(false);
+        cell.setActive(true);
         return cell;
     }
 }

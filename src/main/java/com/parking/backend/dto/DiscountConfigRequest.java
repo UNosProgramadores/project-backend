@@ -1,5 +1,6 @@
 package com.parking.backend.dto;
 
+import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -16,9 +17,18 @@ public class DiscountConfigRequest {
     @Min(value = 0, message = "El porcentaje de descuento debe ser mayor o igual a 0")
     @Max(value = 100, message = "El porcentaje de descuento debe ser menor o igual a 100")
     private BigDecimal discountPercentage;
+
+    @NotNull(message = "El estado activo es requerido")
     private Boolean active;
+
+    @NotNull(message = "La fecha de inicio es requerida")
     private LocalDateTime startDate;
     private LocalDateTime endDate;
+
+    @AssertTrue(message = "Debe proporcionar un monto mínimo de factura externa o un número mínimo de visitas")
+    private boolean isMinExternalInvoiceOrMinVisitsProvided() {
+        return minExternalInvoice != null || minVisits != null;
+    }
 
     public BigDecimal getMinExternalInvoice() {
         return minExternalInvoice;
