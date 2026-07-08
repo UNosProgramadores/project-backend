@@ -139,6 +139,32 @@ class CellServiceTest {
     }
 
     @Test
+    @DisplayName("Bug fix: Cell.code never changes after multiple vehicle type updates")
+    void cellCodeNeverChanges() {
+        ParkingLot lot = buildLot();
+        Cell cell = buildCell(1L, "parking", lot);
+        cell.setCode("5-3");
+        VehicleType vt1 = new VehicleType();
+        vt1.setId(1L);
+        vt1.setName("car");
+        VehicleType vt2 = new VehicleType();
+        vt2.setId(2L);
+        vt2.setName("motorcycle");
+
+        when(cellRepository.findById(1L)).thenReturn(Optional.of(cell));
+        when(vehicleTypeRepository.findById(1L)).thenReturn(Optional.of(vt1));
+        when(vehicleTypeRepository.findById(2L)).thenReturn(Optional.of(vt2));
+        when(cellRepository.save(any(Cell.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        cellService.updateVehicleType(1L, 1L, 1L);
+        cellService.updateVehicleType(1L, 2L, 1L);
+        cellService.updateCellType(1L, "transit", 1L);
+        cellService.updateCellType(1L, "parking", 1L);
+
+        assertEquals("5-3", cell.getCode(), "Cell.code must never change after creation");
+    }
+
+    @Test
     @DisplayName("updateCellType throws when cell belongs to different parking lot")
     void updateCellTypeWithWrongParkingLotThrows() {
         ParkingLot lotA = new ParkingLot();
