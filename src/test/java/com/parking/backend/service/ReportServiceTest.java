@@ -80,11 +80,10 @@ class ReportServiceTest {
                         new Object[]{"motorcycle", 2L}
                 ));
 
-        ReportResponse response = reportService.generateReport(1L, "day", refDate);
+        ReportResponse response = reportService.generateReport(1L, refDate, refDate);
 
         assertEquals(1L, response.getParkingLotId());
         assertEquals("ParKing Downtown", response.getParkingLotName());
-        assertEquals("day", response.getPeriod());
         assertEquals("2026-07-04", response.getReferenceDate());
         assertEquals(new BigDecimal("1250.00"), response.getTotalRevenue());
         assertEquals(13, response.getTotalEntries());
@@ -110,7 +109,7 @@ class ReportServiceTest {
         when(entryRecordRepository.countEntriesByVehicleTypeAndDateRange(eq(1L), any(), any())).thenReturn(List.of());
         when(entryRecordRepository.countExitsByVehicleTypeAndDateRange(eq(1L), any(), any())).thenReturn(List.of());
 
-        reportService.generateReport(1L, "day", refDate);
+        reportService.generateReport(1L, refDate, refDate);
 
         verify(paymentRepository).sumTotalPaidByParkingLotAndDateRange(eq(1L), startCaptor.capture(), endCaptor.capture());
         assertEquals(LocalDateTime.of(2026, 7, 4, 0, 0), startCaptor.getValue());
@@ -121,14 +120,13 @@ class ReportServiceTest {
     @DisplayName("Week report boundaries are Monday 00:00 to next Monday 00:00 ISO")
     void weekReportBoundaries() {
         ParkingLot lot = buildLot(1L, "Test Lot");
-        LocalDate refDate = LocalDate.of(2026, 7, 1);
 
         when(parkingLotRepository.findById(1L)).thenReturn(Optional.of(lot));
         when(paymentRepository.sumTotalPaidByParkingLotAndDateRange(eq(1L), any(), any())).thenReturn(BigDecimal.ZERO);
         when(entryRecordRepository.countEntriesByVehicleTypeAndDateRange(eq(1L), any(), any())).thenReturn(List.of());
         when(entryRecordRepository.countExitsByVehicleTypeAndDateRange(eq(1L), any(), any())).thenReturn(List.of());
 
-        reportService.generateReport(1L, "week", refDate);
+        reportService.generateReport(1L, LocalDate.of(2026, 6, 29), LocalDate.of(2026, 7, 5));
 
         verify(paymentRepository).sumTotalPaidByParkingLotAndDateRange(eq(1L), startCaptor.capture(), endCaptor.capture());
         assertEquals(LocalDateTime.of(2026, 6, 29, 0, 0), startCaptor.getValue());
@@ -139,14 +137,13 @@ class ReportServiceTest {
     @DisplayName("Week report from Monday includes that day (edge case: first day of period)")
     void weekReportOnMondayBoundary() {
         ParkingLot lot = buildLot(1L, "Test Lot");
-        LocalDate refDate = LocalDate.of(2026, 6, 29);
 
         when(parkingLotRepository.findById(1L)).thenReturn(Optional.of(lot));
         when(paymentRepository.sumTotalPaidByParkingLotAndDateRange(eq(1L), any(), any())).thenReturn(BigDecimal.ZERO);
         when(entryRecordRepository.countEntriesByVehicleTypeAndDateRange(eq(1L), any(), any())).thenReturn(List.of());
         when(entryRecordRepository.countExitsByVehicleTypeAndDateRange(eq(1L), any(), any())).thenReturn(List.of());
 
-        reportService.generateReport(1L, "week", refDate);
+        reportService.generateReport(1L, LocalDate.of(2026, 6, 29), LocalDate.of(2026, 7, 5));
 
         verify(paymentRepository).sumTotalPaidByParkingLotAndDateRange(eq(1L), startCaptor.capture(), endCaptor.capture());
         assertEquals(LocalDateTime.of(2026, 6, 29, 0, 0), startCaptor.getValue());
@@ -157,14 +154,13 @@ class ReportServiceTest {
     @DisplayName("Month report boundaries are 1st 00:00 to 1st of next month 00:00")
     void monthReportBoundaries() {
         ParkingLot lot = buildLot(1L, "Test Lot");
-        LocalDate refDate = LocalDate.of(2026, 7, 15);
 
         when(parkingLotRepository.findById(1L)).thenReturn(Optional.of(lot));
         when(paymentRepository.sumTotalPaidByParkingLotAndDateRange(eq(1L), any(), any())).thenReturn(BigDecimal.ZERO);
         when(entryRecordRepository.countEntriesByVehicleTypeAndDateRange(eq(1L), any(), any())).thenReturn(List.of());
         when(entryRecordRepository.countExitsByVehicleTypeAndDateRange(eq(1L), any(), any())).thenReturn(List.of());
 
-        reportService.generateReport(1L, "month", refDate);
+        reportService.generateReport(1L, LocalDate.of(2026, 7, 1), LocalDate.of(2026, 7, 31));
 
         verify(paymentRepository).sumTotalPaidByParkingLotAndDateRange(eq(1L), startCaptor.capture(), endCaptor.capture());
         assertEquals(LocalDateTime.of(2026, 7, 1, 0, 0), startCaptor.getValue());
@@ -175,14 +171,13 @@ class ReportServiceTest {
     @DisplayName("Month report on December boundary rolls to next year correctly")
     void monthReportDecemberBoundary() {
         ParkingLot lot = buildLot(1L, "Test Lot");
-        LocalDate refDate = LocalDate.of(2026, 12, 10);
 
         when(parkingLotRepository.findById(1L)).thenReturn(Optional.of(lot));
         when(paymentRepository.sumTotalPaidByParkingLotAndDateRange(eq(1L), any(), any())).thenReturn(BigDecimal.ZERO);
         when(entryRecordRepository.countEntriesByVehicleTypeAndDateRange(eq(1L), any(), any())).thenReturn(List.of());
         when(entryRecordRepository.countExitsByVehicleTypeAndDateRange(eq(1L), any(), any())).thenReturn(List.of());
 
-        reportService.generateReport(1L, "month", refDate);
+        reportService.generateReport(1L, LocalDate.of(2026, 12, 1), LocalDate.of(2026, 12, 31));
 
         verify(paymentRepository).sumTotalPaidByParkingLotAndDateRange(eq(1L), startCaptor.capture(), endCaptor.capture());
         assertEquals(LocalDateTime.of(2026, 12, 1, 0, 0), startCaptor.getValue());
@@ -200,7 +195,7 @@ class ReportServiceTest {
         when(entryRecordRepository.countEntriesByVehicleTypeAndDateRange(eq(1L), any(), any())).thenReturn(List.of());
         when(entryRecordRepository.countExitsByVehicleTypeAndDateRange(eq(1L), any(), any())).thenReturn(List.of());
 
-        ReportResponse response = reportService.generateReport(1L, "day", refDate);
+        ReportResponse response = reportService.generateReport(1L, refDate, refDate);
 
         assertEquals(BigDecimal.ZERO, response.getTotalRevenue());
         assertEquals(0, response.getTotalEntries());
@@ -222,7 +217,7 @@ class ReportServiceTest {
         when(entryRecordRepository.countExitsByVehicleTypeAndDateRange(eq(1L), any(), any()))
                 .thenReturn(listOfArrays(new Object[]{"car", 3L}));
 
-        ReportResponse response = reportService.generateReport(1L, "day", refDate);
+        ReportResponse response = reportService.generateReport(1L, refDate, refDate);
 
         assertEquals(1L, response.getParkingLotId());
         assertEquals(new BigDecimal("500.00"), response.getTotalRevenue());
@@ -241,20 +236,9 @@ class ReportServiceTest {
         when(parkingLotRepository.findById(99L)).thenReturn(Optional.empty());
 
         RuntimeException ex = assertThrows(RuntimeException.class,
-                () -> reportService.generateReport(99L, "day", LocalDate.of(2026, 7, 4)));
+                () -> reportService.generateReport(99L, LocalDate.of(2026, 7, 4), LocalDate.of(2026, 7, 4)));
 
         assertTrue(ex.getMessage().contains("99"));
     }
 
-    @Test
-    @DisplayName("Invalid period string throws exception")
-    void invalidPeriodThrows() {
-        ParkingLot lot = buildLot(1L, "Test Lot");
-        when(parkingLotRepository.findById(1L)).thenReturn(Optional.of(lot));
-
-        RuntimeException ex = assertThrows(RuntimeException.class,
-                () -> reportService.generateReport(1L, "year", LocalDate.of(2026, 7, 4)));
-
-        assertTrue(ex.getMessage().contains("Período inválido"));
-    }
 }
