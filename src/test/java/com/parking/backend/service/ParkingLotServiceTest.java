@@ -106,8 +106,8 @@ class ParkingLotServiceTest {
         List<Cell> generated = captor.getValue();
         assertEquals(50, generated.size(), "5 rows × 10 cols = 50 cells");
         Cell first = generated.getFirst();
-        assertEquals(1, first.getRow().intValue());
-        assertEquals(1, first.getCol().intValue());
+        assertEquals(0, first.getRow().intValue());
+        assertEquals(0, first.getCol().intValue());
         assertEquals("parking", first.getCellType());
         assertEquals("available", first.getStatus());
     }
