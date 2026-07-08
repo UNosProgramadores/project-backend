@@ -171,7 +171,7 @@ public class EntryRecordService {
                                 "La asignación automática está deshabilitada. Se requiere un cellId."
                         );
             }
-            Cell cell = cellRepository.findByIdAndParkingLot(request.getCellId(), parkingLot)
+            Cell cell = cellRepository.findByIdAndParkingLotAndActiveTrue(request.getCellId(), parkingLot)
                     .orElseThrow(() -> new RuntimeException(
                             "Celda no encontrada en este parqueadero"
                     ));
@@ -189,7 +189,7 @@ public class EntryRecordService {
             return cell;
         }
         return cellRepository
-                .findFirstByParkingLotAndVehicleTypeAndStatusAndReservedForStaff(
+                .findFirstByParkingLotAndVehicleTypeAndStatusAndReservedForStaffAndActiveTrue(
                         parkingLot,
                         vehicle.getVehicleType(),
                         "available",
