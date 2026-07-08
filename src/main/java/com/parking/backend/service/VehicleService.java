@@ -9,6 +9,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class VehicleService {
 
@@ -48,6 +50,14 @@ public class VehicleService {
             return vehicleRepository.findByBikeRegistration(request.getBikeRegistration()).orElse(null);
         }
         throw new RuntimeException("Placa o registro de bicicleta es requerido");
+    }
+
+    public List<Vehicle> getMyVehicles() {
+        User currentUser = getCurrentUser();
+        if (currentUser == null) {
+            throw new RuntimeException("Usuario autenticado no encontrado");
+        }
+        return vehicleRepository.findByOwnerId(currentUser.getId());
     }
 
     private User getCurrentUser() {
