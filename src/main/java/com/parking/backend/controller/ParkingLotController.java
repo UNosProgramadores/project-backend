@@ -14,10 +14,14 @@ import com.parking.backend.service.ParkingLotService;
 import com.parking.backend.dto.InvoiceResponse;
 import com.parking.backend.repository.InvoiceRepository;
 import jakarta.validation.Valid;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -81,9 +85,17 @@ public class ParkingLotController {
     }
 
     @GetMapping("/{parkingLotId}/invoices")
-    public ResponseEntity<List<InvoiceResponse>> getInvoices(@PathVariable Long parkingLotId) {
+    public ResponseEntity<List<InvoiceResponse>> getInvoices(
+            @PathVariable Long parkingLotId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(required = false) String paymentMethod,
+            @RequestParam(required = false) BigDecimal minTotal,
+            @RequestParam(required = false) BigDecimal maxTotal) {
+        LocalDateTime start = startDate != null ? startDate.atStartOfDay() : null;
+        LocalDateTime end = endDate != null ? endDate.plusDays(1).atStartOfDay() : null;
         return ResponseEntity.ok(
-                invoiceRepository.findByParkingLotId(parkingLotId)
+                invoiceRepository.findByParkingLotIdWithFilters(parkingLotId, start, end, paymentMethod, minTotal, maxTotal)
                         .stream()
                         .map(InvoiceResponse::fromEntity)
                         .toList());
