@@ -5,22 +5,22 @@ import jakarta.validation.constraints.NotNull;
 
 public class StaffRequest {
 
-    @NotBlank(message = "Document is required")
+    @NotBlank(message = "El documento es obligatorio")
     private String document;
 
-    @NotBlank(message = "Name is required")
+    @NotBlank(message = "El nombre es obligatorio")
     private String name;
 
     @NotBlank(message = "El teléfono es obligatorio")
     private String phone;
 
-    @NotBlank(message = "Username is required")
+    @NotBlank(message = "El nombre de usuario es obligatorio")
     private String username;
 
-    @NotBlank(message = "Password is required")
+    @NotBlank(message = "La contraseña es obligatoria")
     private String password;
 
-    @NotNull(message = "Parking lot ID is required")
+    @NotNull(message = "El ID del parqueadero es obligatorio")
     private Long parkingLotId;
 
     public String getDocument() { return document; }

@@ -45,7 +45,7 @@ public class ReportService {
      */
     public ReportResponse generateReport(Long parkingLotId, String period, LocalDate referenceDate) {
         ParkingLot parkingLot = parkingLotRepository.findById(parkingLotId)
-                .orElseThrow(() -> new RuntimeException("Parking lot not found with ID: " + parkingLotId));
+                .orElseThrow(() -> new RuntimeException("Parqueadero no encontrado con ID: " + parkingLotId));
 
         LocalDateTime start = computeStart(referenceDate, period);
         LocalDateTime end = computeEnd(referenceDate, period);
