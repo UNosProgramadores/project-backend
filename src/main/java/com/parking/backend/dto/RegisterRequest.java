@@ -1,6 +1,7 @@
 package com.parking.backend.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 
 public class RegisterRequest {
 
@@ -11,6 +12,7 @@ public class RegisterRequest {
     private String name;
 
     @NotBlank(message = "El teléfono es obligatorio")
+    @Pattern(regexp = "^[0-9]{10}$", message = "El teléfono debe tener exactamente 10 dígitos")
     private String phone;
 
     @NotBlank(message = "El nombre de usuario es obligatorio")

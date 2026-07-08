@@ -245,7 +245,7 @@ class EntryRecordServiceTest {
 
         when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
         when(entryRecordRepository.findByVehicleAndStatus(car, "active"))
-                .thenReturn(Optional.of(activeRecord));
+                .thenReturn(List.of(activeRecord));
         when(userRepository.findByUsername("lgomez")).thenReturn(Optional.of(staffUser));
         when(rateRepository.findByParkingLotAndVehicleTypeAndActive(parkingLot, carType, true))
                 .thenReturn(List.of(rate));
@@ -303,7 +303,7 @@ class EntryRecordServiceTest {
 
         when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
         when(entryRecordRepository.findByVehicleAndStatus(car, "active"))
-                .thenReturn(Optional.of(activeRecord));
+                .thenReturn(List.of(activeRecord));
         when(userRepository.findByUsername("lgomez")).thenReturn(Optional.of(staffUser));
         when(rateRepository.findByParkingLotAndVehicleTypeAndActive(parkingLot, carType, true))
                 .thenReturn(List.of(rate));
@@ -330,7 +330,7 @@ class EntryRecordServiceTest {
         when(parkingLotRepository.findById(1L)).thenReturn(Optional.of(parkingLot));
         when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
         when(entryRecordRepository.findByVehicleAndStatus(car, "active"))
-                .thenReturn(Optional.of(new EntryRecord()));
+                .thenReturn(List.of(new EntryRecord()));
 
         RuntimeException exception = assertThrows(
                 RuntimeException.class,
@@ -378,7 +378,7 @@ class EntryRecordServiceTest {
         when(parkingLotRepository.findById(1L)).thenReturn(Optional.of(parkingLot));
         when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
         when(entryRecordRepository.findByVehicleAndStatus(car, "active"))
-                .thenReturn(Optional.empty());
+                .thenReturn(List.of());
 
         RuntimeException exception = assertThrows(
                 RuntimeException.class,
@@ -398,7 +398,7 @@ class EntryRecordServiceTest {
         when(parkingLotRepository.findById(1L)).thenReturn(Optional.of(parkingLot));
         when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
         when(entryRecordRepository.findByVehicleAndStatus(car, "active"))
-                .thenReturn(Optional.empty());
+                .thenReturn(List.of());
         when(cellRepository.findByIdAndParkingLotAndActiveTrue(99L, parkingLot)).thenReturn(Optional.empty());
 
         RuntimeException exception = assertThrows(
@@ -421,7 +421,7 @@ class EntryRecordServiceTest {
         when(parkingLotRepository.findById(1L)).thenReturn(Optional.of(parkingLot));
         when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
         when(entryRecordRepository.findByVehicleAndStatus(car, "active"))
-                .thenReturn(Optional.empty());
+                .thenReturn(List.of());
         when(cellRepository.findByIdAndParkingLotAndActiveTrue(10L, parkingLot)).thenReturn(Optional.of(availableCell));
 
         RuntimeException exception = assertThrows(
@@ -443,7 +443,7 @@ class EntryRecordServiceTest {
         when(parkingLotRepository.findById(1L)).thenReturn(Optional.of(parkingLot));
         when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
         when(entryRecordRepository.findByVehicleAndStatus(car, "active"))
-                .thenReturn(Optional.empty());
+                .thenReturn(List.of());
         when(cellRepository.findByIdAndParkingLotAndActiveTrue(10L, parkingLot)).thenReturn(Optional.of(availableCell));
 
         RuntimeException exception = assertThrows(
@@ -469,7 +469,7 @@ class EntryRecordServiceTest {
         when(parkingLotRepository.findById(1L)).thenReturn(Optional.of(parkingLot));
         when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
         when(entryRecordRepository.findByVehicleAndStatus(car, "active"))
-                .thenReturn(Optional.empty());
+                .thenReturn(List.of());
         when(cellRepository.findByIdAndParkingLotAndActiveTrue(10L, parkingLot)).thenReturn(Optional.of(availableCell));
 
         RuntimeException exception = assertThrows(
@@ -557,7 +557,7 @@ class EntryRecordServiceTest {
 
         when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
         when(entryRecordRepository.findByVehicleAndStatus(car, "active"))
-                .thenReturn(Optional.of(activeRecord));
+                .thenReturn(List.of(activeRecord));
 
         RuntimeException exception = assertThrows(
                 RuntimeException.class,
@@ -592,7 +592,7 @@ class EntryRecordServiceTest {
 
         when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
         when(entryRecordRepository.findByVehicleAndStatus(car, "active"))
-                .thenReturn(Optional.of(activeRecord));
+                .thenReturn(List.of(activeRecord));
         when(userRepository.findByUsername("lgomez")).thenReturn(Optional.of(staffUser));
         when(rateRepository.findByParkingLotAndVehicleTypeAndActive(parkingLot, carType, true))
                 .thenReturn(List.of(rate));
@@ -655,7 +655,7 @@ class EntryRecordServiceTest {
 
         when(vehicleRepository.findByBikeRegistration("BIKE-001")).thenReturn(Optional.of(bike));
         when(entryRecordRepository.findByVehicleAndStatus(bike, "active"))
-                .thenReturn(Optional.of(activeRecord));
+                .thenReturn(List.of(activeRecord));
         when(userRepository.findByUsername("lgomez")).thenReturn(Optional.of(staffUser));
         when(rateRepository.findByParkingLotAndVehicleTypeAndActive(parkingLot, bike.getVehicleType(), true))
                 .thenReturn(List.of(rate));
@@ -746,7 +746,7 @@ class EntryRecordServiceTest {
 
         when(vehicleRepository.findByPlate("OWNED-01")).thenReturn(Optional.of(ownedCar));
         when(entryRecordRepository.findByVehicleAndStatus(ownedCar, "active"))
-                .thenReturn(Optional.of(activeRecord));
+                .thenReturn(List.of(activeRecord));
         when(userRepository.findByUsername("lgomez")).thenReturn(Optional.of(staffUser));
         when(rateRepository.findByParkingLotAndVehicleTypeAndActive(parkingLot, carType, true))
                 .thenReturn(List.of(rate));
@@ -807,7 +807,7 @@ class EntryRecordServiceTest {
         // but the rule says < 360 → per_minute regardless
         when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
         when(entryRecordRepository.findByVehicleAndStatus(car, "active"))
-                .thenReturn(Optional.of(activeRecord));
+                .thenReturn(List.of(activeRecord));
         when(userRepository.findByUsername("lgomez")).thenReturn(Optional.of(staffUser));
         when(rateRepository.findByParkingLotAndVehicleTypeAndActive(parkingLot, carType, true))
                 .thenReturn(List.of(perMinute, flat));
@@ -853,7 +853,7 @@ class EntryRecordServiceTest {
         // 400 min * 2 = 800 if per_minute, but flat = 360 is cheaper → business rule applies
         when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
         when(entryRecordRepository.findByVehicleAndStatus(car, "active"))
-                .thenReturn(Optional.of(activeRecord));
+                .thenReturn(List.of(activeRecord));
         when(userRepository.findByUsername("lgomez")).thenReturn(Optional.of(staffUser));
         when(rateRepository.findByParkingLotAndVehicleTypeAndActive(parkingLot, carType, true))
                 .thenReturn(List.of(perMinute, flat));
@@ -898,7 +898,7 @@ class EntryRecordServiceTest {
 
         when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
         when(entryRecordRepository.findByVehicleAndStatus(car, "active"))
-                .thenReturn(Optional.of(activeRecord));
+                .thenReturn(List.of(activeRecord));
         when(userRepository.findByUsername("lgomez")).thenReturn(Optional.of(staffUser));
         when(rateRepository.findByParkingLotAndVehicleTypeAndActive(parkingLot, carType, true))
                 .thenReturn(List.of(perMinute, flat));
@@ -936,7 +936,7 @@ class EntryRecordServiceTest {
 
         when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
         when(entryRecordRepository.findByVehicleAndStatus(car, "active"))
-                .thenReturn(Optional.of(activeRecord));
+                .thenReturn(List.of(activeRecord));
         when(userRepository.findByUsername("lgomez")).thenReturn(Optional.of(staffUser));
         when(rateRepository.findByParkingLotAndVehicleTypeAndActive(parkingLot, carType, true))
                 .thenReturn(List.of(perMinute));
@@ -951,6 +951,50 @@ class EntryRecordServiceTest {
 
         assertEquals(500, response.getDuration());
         assertEquals(new BigDecimal("1000"), response.getSubtotal());
+    }
+
+    @Test
+    @DisplayName("Register exit with duplicate active entries picks the first one (not crash)")
+    void registerExitWithDuplicateActiveEntriesPicksFirst() {
+        EntryRecord first = new EntryRecord();
+        first.setId(1L);
+        first.setVehicle(car);
+        first.setCell(availableCell);
+        first.setEntryTime(java.time.LocalDateTime.now().minusHours(3));
+        first.setStatus("active");
+
+        EntryRecord second = new EntryRecord();
+        second.setId(2L);
+        second.setVehicle(car);
+        second.setCell(availableCell);
+        second.setEntryTime(java.time.LocalDateTime.now().minusHours(1));
+        second.setStatus("active");
+
+        Rate rate = new Rate();
+        rate.setId(1L);
+        rate.setParkingLot(parkingLot);
+        rate.setVehicleType(carType);
+        rate.setRateType("flat");
+        rate.setCost(new BigDecimal("50"));
+        rate.setActive(true);
+
+        when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
+        when(entryRecordRepository.findByVehicleAndStatus(car, "active"))
+                .thenReturn(List.of(first, second));
+        when(userRepository.findByUsername("lgomez")).thenReturn(Optional.of(staffUser));
+        when(rateRepository.findByParkingLotAndVehicleTypeAndActive(parkingLot, carType, true))
+                .thenReturn(List.of(rate));
+        when(paymentRepository.save(any(Payment.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(invoiceRepository.save(any(Invoice.class))).thenAnswer(inv -> {
+            Invoice invEntity = inv.getArgument(0);
+            invEntity.setId(999L);
+            return invEntity;
+        });
+
+        var response = entryRecordService.registerExit(exitRequest);
+
+        assertNotNull(response);
+        assertEquals(1L, response.getEntryRecordId(), "Should use the first active entry");
     }
 
     @Test
@@ -981,7 +1025,7 @@ class EntryRecordServiceTest {
 
         when(vehicleRepository.findByPlate("ABC-123")).thenReturn(Optional.of(car));
         when(entryRecordRepository.findByVehicleAndStatus(car, "active"))
-                .thenReturn(Optional.of(activeRecord));
+                .thenReturn(List.of(activeRecord));
         when(userRepository.findByUsername("lgomez")).thenReturn(Optional.of(staffUser));
         when(rateRepository.findByParkingLotAndVehicleTypeAndActive(parkingLot, carType, true))
                 .thenReturn(List.of(perMinute, flat));

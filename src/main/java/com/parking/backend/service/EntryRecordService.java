@@ -76,7 +76,8 @@ public class EntryRecordService {
     private Vehicle findOrCreateVehicle(String plate, String bikeRegistration, Long vehicleTypeId, String ownerDocument) {
         Vehicle vehicle;
         if (plate != null && !plate.isBlank()) {
-            vehicle = vehicleRepository.findByPlate(plate).orElseGet(() -> {
+            String normalized = plate.trim().toUpperCase();
+            vehicle = vehicleRepository.findByPlate(normalized).orElseGet(() -> {
                 if (vehicleTypeId == null) {
                     throw new RuntimeException("vehicleTypeId es requerido");
                 }
@@ -87,13 +88,14 @@ public class EntryRecordService {
                     throw new RuntimeException("El tipo de vehículo proporcionado no acepta placa");
                 }
                 Vehicle v = new Vehicle();
-                v.setPlate(plate);
+                v.setPlate(normalized);
                 v.setVehicleType(vehicleType);
                 v.setActive(true);
                 return vehicleRepository.save(v);
             });
         } else if (bikeRegistration != null && !bikeRegistration.isBlank()) {
-            vehicle = vehicleRepository.findByBikeRegistration(bikeRegistration).orElseGet(() -> {
+            String normalized = bikeRegistration.trim().toUpperCase();
+            vehicle = vehicleRepository.findByBikeRegistration(normalized).orElseGet(() -> {
                 if (vehicleTypeId == null) {
                     throw new RuntimeException("vehicleTypeId es requerido");
                 }
@@ -104,7 +106,7 @@ public class EntryRecordService {
                     throw new RuntimeException("El tipo de vehículo proporcionado requiere placa, no bikeRegistration");
                 }
                 Vehicle v = new Vehicle();
-                v.setBikeRegistration(bikeRegistration);
+                v.setBikeRegistration(normalized);
                 v.setVehicleType(vehicleType);
                 v.setActive(true);
                 return vehicleRepository.save(v);
@@ -138,14 +140,14 @@ public class EntryRecordService {
         Vehicle vehicle = findOrCreateVehicle(
                 request.getPlate(), request.getBikeRegistration(), request.getVehicleTypeId(), request.getOwnerDocument()
         );
-        entryRecordRepository.findByVehicleAndStatus(
+        if (!entryRecordRepository.findByVehicleAndStatus(
                 vehicle,
                 "active"
-        ).ifPresent(record -> {
+        ).isEmpty()) {
             throw new RuntimeException(
                     "El vehículo ya se encuentra dentro del parqueadero"
             );
-        });
+        }
 
         Cell cell = resolveCell(parkingLot, vehicle, request);
 
@@ -210,9 +212,10 @@ public class EntryRecordService {
 
         for (String v : values) {
             if (v == null || v.isBlank()) continue;
-            vehicle = vehicleRepository.findByPlate(v).orElse(null);
+            String normalized = v.trim().toUpperCase();
+            vehicle = vehicleRepository.findByPlate(normalized).orElse(null);
             if (vehicle != null) break;
-            vehicle = vehicleRepository.findByBikeRegistration(v).orElse(null);
+            vehicle = vehicleRepository.findByBikeRegistration(normalized).orElse(null);
             if (vehicle != null) break;
         }
 
@@ -220,8 +223,11 @@ public class EntryRecordService {
             throw new RuntimeException("Vehículo no encontrado");
         }
 
-        EntryRecord record = entryRecordRepository.findByVehicleAndStatus(vehicle, "active")
-                .orElseThrow(() -> new RuntimeException("No se encontró una entrada activa para este vehículo"));
+        List<EntryRecord> activeRecords = entryRecordRepository.findByVehicleAndStatus(vehicle, "active");
+        if (activeRecords.isEmpty()) {
+            throw new RuntimeException("No se encontró una entrada activa para este vehículo");
+        }
+        EntryRecord record = activeRecords.get(0);
 
         Long recordParkingLotId = record.getCell().getParkingLot().getId();
         if (!recordParkingLotId.equals(request.getParkingLotId())) {

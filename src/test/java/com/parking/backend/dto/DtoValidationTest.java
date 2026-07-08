@@ -1,5 +1,6 @@
 package com.parking.backend.dto;
 
+import com.parking.backend.entity.Vehicle;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -285,5 +286,215 @@ class DtoValidationTest {
         Set<ConstraintViolation<ParkingLotRequest>> violations = validator.validate(req);
         assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("rows")));
         assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("columns")));
+    }
+
+    // ──────────────────────────────────────────────
+    // Validación de formato de placa y registro
+    // ──────────────────────────────────────────────
+
+    @Test
+    @DisplayName("VehicleEntryRequest accepts valid car plate ABC123")
+    void vehicleEntryAcceptsValidCarPlate() {
+        VehicleEntryRequest req = new VehicleEntryRequest();
+        req.setParkingLotId(1L);
+        req.setVehicleTypeId(1L);
+        req.setPlate("ABC123");
+        Set<ConstraintViolation<VehicleEntryRequest>> violations = validator.validate(req);
+        assertTrue(violations.stream().noneMatch(v -> v.getPropertyPath().toString().equals("carPlateFormatValid")));
+    }
+
+    @Test
+    @DisplayName("VehicleEntryRequest rejects invalid car plate ABCDEF (no digits)")
+    void vehicleEntryRejectsInvalidCarPlate() {
+        VehicleEntryRequest req = new VehicleEntryRequest();
+        req.setParkingLotId(1L);
+        req.setVehicleTypeId(1L);
+        req.setPlate("ABCDEF");
+        Set<ConstraintViolation<VehicleEntryRequest>> violations = validator.validate(req);
+        assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("carPlateFormatValid")));
+    }
+
+    @Test
+    @DisplayName("VehicleEntryRequest rejects car plate ABC78A (moto format)")
+    void vehicleEntryRejectsMotoPlateForCar() {
+        VehicleEntryRequest req = new VehicleEntryRequest();
+        req.setParkingLotId(1L);
+        req.setVehicleTypeId(1L);
+        req.setPlate("ABC78A");
+        Set<ConstraintViolation<VehicleEntryRequest>> violations = validator.validate(req);
+        assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("carPlateFormatValid")));
+    }
+
+    @Test
+    @DisplayName("VehicleEntryRequest accepts valid motorcycle plate ABC78A")
+    void vehicleEntryAcceptsValidMotorcyclePlate() {
+        VehicleEntryRequest req = new VehicleEntryRequest();
+        req.setParkingLotId(1L);
+        req.setVehicleTypeId(2L);
+        req.setPlate("ABC78A");
+        Set<ConstraintViolation<VehicleEntryRequest>> violations = validator.validate(req);
+        assertTrue(violations.stream().noneMatch(v -> v.getPropertyPath().toString().equals("motorcyclePlateFormatValid")));
+    }
+
+    @Test
+    @DisplayName("VehicleEntryRequest rejects invalid motorcycle plate ABC123 (car format)")
+    void vehicleEntryRejectsCarPlateForMotorcycle() {
+        VehicleEntryRequest req = new VehicleEntryRequest();
+        req.setParkingLotId(1L);
+        req.setVehicleTypeId(2L);
+        req.setPlate("ABC123");
+        Set<ConstraintViolation<VehicleEntryRequest>> violations = validator.validate(req);
+        assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("motorcyclePlateFormatValid")));
+    }
+
+    @Test
+    @DisplayName("VehicleEntryRequest rejects invalid motorcycle plate ABCDEFG (all letters)")
+    void vehicleEntryRejectsInvalidMotorcyclePlate() {
+        VehicleEntryRequest req = new VehicleEntryRequest();
+        req.setParkingLotId(1L);
+        req.setVehicleTypeId(2L);
+        req.setPlate("ABCDEFG");
+        Set<ConstraintViolation<VehicleEntryRequest>> violations = validator.validate(req);
+        assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("motorcyclePlateFormatValid")));
+    }
+
+    @Test
+    @DisplayName("VehicleEntryRequest accepts valid bike registration ABCDEFG")
+    void vehicleEntryAcceptsValidBikeReg() {
+        VehicleEntryRequest req = new VehicleEntryRequest();
+        req.setParkingLotId(1L);
+        req.setVehicleTypeId(3L);
+        req.setBikeRegistration("ABCDEFG");
+        Set<ConstraintViolation<VehicleEntryRequest>> violations = validator.validate(req);
+        assertTrue(violations.stream().noneMatch(v -> v.getPropertyPath().toString().equals("bikeRegistrationFormatValid")));
+    }
+
+    @Test
+    @DisplayName("VehicleEntryRequest rejects bike registration with digits ABC1234")
+    void vehicleEntryRejectsBikeRegWithDigits() {
+        VehicleEntryRequest req = new VehicleEntryRequest();
+        req.setParkingLotId(1L);
+        req.setVehicleTypeId(3L);
+        req.setBikeRegistration("ABC1234");
+        Set<ConstraintViolation<VehicleEntryRequest>> violations = validator.validate(req);
+        assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("bikeRegistrationFormatValid")));
+    }
+
+    @Test
+    @DisplayName("VehicleEntryRequest rejects bike registration too short ABCDEF")
+    void vehicleEntryRejectsBikeRegTooShort() {
+        VehicleEntryRequest req = new VehicleEntryRequest();
+        req.setParkingLotId(1L);
+        req.setVehicleTypeId(3L);
+        req.setBikeRegistration("ABCDEF");
+        Set<ConstraintViolation<VehicleEntryRequest>> violations = validator.validate(req);
+        assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("bikeRegistrationFormatValid")));
+    }
+
+    // ──────────────────────────────────────────────
+    // Validación de formato de teléfono
+    // ──────────────────────────────────────────────
+
+    @Test
+    @DisplayName("RegisterRequest accepts valid 10-digit phone")
+    void registerRequestAcceptsValidPhone() {
+        RegisterRequest req = new RegisterRequest();
+        req.setDocument("123");
+        req.setName("Test");
+        req.setPhone("3001234567");
+        req.setUsername("user");
+        req.setPassword("pass");
+        Set<ConstraintViolation<RegisterRequest>> violations = validator.validate(req);
+        assertTrue(violations.stream().noneMatch(v -> v.getPropertyPath().toString().equals("phone")));
+    }
+
+    @Test
+    @DisplayName("RegisterRequest rejects phone with 9 digits")
+    void registerRequestRejectsPhone9Digits() {
+        RegisterRequest req = new RegisterRequest();
+        req.setDocument("123");
+        req.setName("Test");
+        req.setPhone("300123456");
+        req.setUsername("user");
+        req.setPassword("pass");
+        Set<ConstraintViolation<RegisterRequest>> violations = validator.validate(req);
+        assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("phone")));
+    }
+
+    @Test
+    @DisplayName("RegisterRequest rejects phone with letters")
+    void registerRequestRejectsPhoneWithLetters() {
+        RegisterRequest req = new RegisterRequest();
+        req.setDocument("123");
+        req.setName("Test");
+        req.setPhone("300ABC4567");
+        req.setUsername("user");
+        req.setPassword("pass");
+        Set<ConstraintViolation<RegisterRequest>> violations = validator.validate(req);
+        assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("phone")));
+    }
+
+    @Test
+    @DisplayName("StaffRequest accepts valid 10-digit phone")
+    void staffRequestAcceptsValidPhone() {
+        StaffRequest req = new StaffRequest();
+        req.setDocument("123");
+        req.setName("Test");
+        req.setPhone("3109876543");
+        req.setUsername("user");
+        req.setPassword("pass");
+        req.setParkingLotId(1L);
+        Set<ConstraintViolation<StaffRequest>> violations = validator.validate(req);
+        assertTrue(violations.stream().noneMatch(v -> v.getPropertyPath().toString().equals("phone")));
+    }
+
+    @Test
+    @DisplayName("StaffRequest rejects phone with 11 digits")
+    void staffRequestRejectsPhone11Digits() {
+        StaffRequest req = new StaffRequest();
+        req.setDocument("123");
+        req.setName("Test");
+        req.setPhone("31098765432");
+        req.setUsername("user");
+        req.setPassword("pass");
+        req.setParkingLotId(1L);
+        Set<ConstraintViolation<StaffRequest>> violations = validator.validate(req);
+        assertTrue(violations.stream().anyMatch(v -> v.getPropertyPath().toString().equals("phone")));
+    }
+
+    // ──────────────────────────────────────────────
+    // Normalización de Vehicle (trim + uppercase)
+    // ──────────────────────────────────────────────
+
+    @Test
+    @DisplayName("Vehicle.setPlate normaliza a mayúsculas y sin espacios")
+    void vehicleSetPlateNormalizes() {
+        Vehicle v = new Vehicle();
+        v.setPlate("  abc-123  ");
+        assertEquals("ABC-123", v.getPlate());
+    }
+
+    @Test
+    @DisplayName("Vehicle.setPlate acepta null")
+    void vehicleSetPlateAcceptsNull() {
+        Vehicle v = new Vehicle();
+        v.setPlate(null);
+        assertNull(v.getPlate());
+    }
+
+    @Test
+    @DisplayName("Vehicle.setBikeRegistration normaliza a mayúsculas")
+    void vehicleSetBikeRegNormalizes() {
+        Vehicle v = new Vehicle();
+        v.setBikeRegistration("  bike-001  ");
+        assertEquals("BIKE-001", v.getBikeRegistration());
+    }
+
+    @Test
+    @DisplayName("Vehicle.setBikeRegistration acepta null")
+    void vehicleSetBikeRegAcceptsNull() {
+        Vehicle v = new Vehicle();
+        v.setBikeRegistration(null);
+        assertNull(v.getBikeRegistration());
     }
 }
