@@ -44,10 +44,10 @@ public class VehicleService {
 
     private Vehicle findVehicle(ClaimVehicleRequest request) {
         if (request.getPlate() != null && !request.getPlate().isBlank()) {
-            return vehicleRepository.findByPlate(request.getPlate()).orElse(null);
+            return vehicleRepository.findByPlate(request.getPlate().trim().toUpperCase()).orElse(null);
         }
         if (request.getBikeRegistration() != null && !request.getBikeRegistration().isBlank()) {
-            return vehicleRepository.findByBikeRegistration(request.getBikeRegistration()).orElse(null);
+            return vehicleRepository.findByBikeRegistration(request.getBikeRegistration().trim().toUpperCase()).orElse(null);
         }
         throw new RuntimeException("Placa o registro de bicicleta es requerido");
     }
