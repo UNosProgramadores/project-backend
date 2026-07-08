@@ -5,7 +5,6 @@ import com.parking.backend.entity.Cell;
 import com.parking.backend.entity.ParkingLot;
 import com.parking.backend.repository.CellRepository;
 import com.parking.backend.repository.ParkingLotRepository;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -104,24 +103,23 @@ public class ParkingLotService {
         cellRepository.saveAll(cells);
     }
 
-    // ponytail: no reallocation logic — add new cells on growth, reject shrink if occupied
+    // ponytail: hide out-of-bounds cells by setting row/col to -1 instead of deleting
     private void syncCells(ParkingLot lot, int newRows, int newCols, int oldRows, int oldCols) {
         List<Cell> existing = cellRepository.findByParkingLot(lot);
 
         if (newRows < oldRows || newCols < oldCols) {
-            List<Cell> toRemove = existing.stream()
-                    .filter(c -> c.getRow() > newRows || c.getCol() > newCols)
-                    .collect(Collectors.toList());
-            for (Cell c : toRemove) {
-                if ("occupied".equals(c.getStatus())) {
-                    throw new RuntimeException("No se puede reducir: la celda " + c.getCode() + " está ocupada");
+            boolean anyOccupied = existing.stream()
+                    .anyMatch(c -> "occupied".equals(c.getStatus()));
+            if (anyOccupied) {
+                throw new RuntimeException("No se puede reducir el tamaño: el parqueadero tiene vehículos ocupando celdas. Debe estar vacío.");
+            }
+            for (Cell c : existing) {
+                if (c.getRow() >= newRows || c.getCol() >= newCols) {
+                    c.setRow(-1);
+                    c.setCol(-1);
                 }
             }
-            try {
-                cellRepository.deleteAll(toRemove);
-            } catch (DataIntegrityViolationException e) {
-                throw new RuntimeException("No se puede reducir: algunas celdas tienen registros de entrada asociados");
-            }
+            cellRepository.saveAll(existing);
         }
 
         if (newRows > oldRows || newCols > oldCols || existing.size() < newRows * newCols) {
