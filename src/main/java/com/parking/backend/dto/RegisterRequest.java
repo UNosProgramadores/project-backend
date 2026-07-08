@@ -10,6 +10,7 @@ public class RegisterRequest {
     @NotBlank(message = "Name is required")
     private String name;
 
+    @NotBlank(message = "El teléfono es obligatorio")
     private String phone;
 
     @NotBlank(message = "Username is required")
