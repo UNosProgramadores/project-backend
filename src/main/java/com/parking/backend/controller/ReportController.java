@@ -21,12 +21,9 @@ public class ReportController {
     @GetMapping
     public ResponseEntity<?> getReport(
             @PathVariable Long parkingLotId,
-            @RequestParam String period,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
-        if (date == null) {
-            date = LocalDate.now();
-        }
-        ReportResponse response = reportService.generateReport(parkingLotId, period, date);
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        ReportResponse response = reportService.generateReport(parkingLotId, startDate, endDate);
         return ResponseEntity.ok(response);
     }
 }

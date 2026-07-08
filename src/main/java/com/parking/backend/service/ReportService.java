@@ -1,6 +1,7 @@
 package com.parking.backend.service;
 
 import com.parking.backend.dto.ReportResponse;
+import com.parking.backend.dto.ReportResponse.StaffActivity;
 import com.parking.backend.dto.ReportResponse.VehicleTypeCount;
 import com.parking.backend.entity.ParkingLot;
 import com.parking.backend.repository.EntryRecordRepository;
@@ -9,13 +10,12 @@ import com.parking.backend.repository.PaymentRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ReportService {
@@ -32,23 +32,12 @@ public class ReportService {
         this.parkingLotRepository = parkingLotRepository;
     }
 
-    /**
-     * Generates a report for the given parking lot and period.
-     *
-     * Period boundaries (ISO-like):
-     * - day:   [date 00:00, next day 00:00)
-     * - week:  [Monday 00:00 of the ISO week containing date, next Monday 00:00)
-     * - month: [1st of the month 00:00, 1st of next month 00:00)
-     *
-     * Using half-open intervals [start, end) ensures that adding a day/month/week
-     * always produces a clean non-overlapping boundary without 23:59:59 edge cases.
-     */
-    public ReportResponse generateReport(Long parkingLotId, String period, LocalDate referenceDate) {
+    public ReportResponse generateReport(Long parkingLotId, LocalDate startDate, LocalDate endDate) {
         ParkingLot parkingLot = parkingLotRepository.findById(parkingLotId)
                 .orElseThrow(() -> new RuntimeException("Parqueadero no encontrado con ID: " + parkingLotId));
 
-        LocalDateTime start = computeStart(referenceDate, period);
-        LocalDateTime end = computeEnd(referenceDate, period);
+        LocalDateTime start = startDate.atStartOfDay();
+        LocalDateTime end = endDate.plusDays(1).atStartOfDay();
 
         BigDecimal totalRevenue = paymentRepository.sumTotalPaidByParkingLotAndDateRange(parkingLotId, start, end);
 
@@ -58,11 +47,16 @@ public class ReportService {
         List<VehicleTypeCount> entriesByType = mapCounts(entryRaw);
         List<VehicleTypeCount> exitsByType = mapCounts(exitRaw);
 
+        List<Object[]> entryStaffRaw = entryRecordRepository.countEntriesByStaff(parkingLotId, start, end);
+        List<Object[]> exitStaffRaw = entryRecordRepository.countExitsByStaff(parkingLotId, start, end);
+
+        List<StaffActivity> staffActivity = mergeStaffActivity(entryStaffRaw, exitStaffRaw);
+
         ReportResponse res = new ReportResponse();
         res.setParkingLotId(parkingLot.getId());
         res.setParkingLotName(parkingLot.getName());
-        res.setPeriod(period);
-        res.setReferenceDate(referenceDate.toString());
+        res.setPeriod("");
+        res.setReferenceDate(startDate.toString());
         res.setStartDate(start.toString());
         res.setEndDate(end.toString());
         res.setTotalRevenue(totalRevenue);
@@ -70,27 +64,29 @@ public class ReportService {
         res.setTotalExits(exitsByType.stream().mapToLong(VehicleTypeCount::getCount).sum());
         res.setEntriesByVehicleType(entriesByType);
         res.setExitsByVehicleType(exitsByType);
+        res.setStaffActivity(staffActivity);
 
         return res;
     }
 
-    private LocalDateTime computeStart(LocalDate date, String period) {
-        return switch (period) {
-            case "day" -> date.atStartOfDay();
-            case "week" -> date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).atStartOfDay();
-            case "month" -> date.withDayOfMonth(1).atStartOfDay();
-            default -> throw new RuntimeException("Período inválido: " + period + ". Debe ser 'day', 'week' o 'month'");
-        };
-    }
+    private List<StaffActivity> mergeStaffActivity(List<Object[]> entryStaff, List<Object[]> exitStaff) {
+        Map<Long, StaffActivity> map = new HashMap<>();
 
-    private LocalDateTime computeEnd(LocalDate date, String period) {
-        LocalDate endDate = switch (period) {
-            case "day" -> date.plusDays(1);
-            case "week" -> date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).plusWeeks(1);
-            case "month" -> date.withDayOfMonth(1).plusMonths(1);
-            default -> throw new RuntimeException("Período inválido: " + period);
-        };
-        return endDate.atStartOfDay();
+        for (Object[] row : entryStaff) {
+            Long id = (Long) row[0];
+            String name = (String) row[1];
+            long count = (Long) row[2];
+            map.put(id, new StaffActivity(id, name, count, 0));
+        }
+
+        for (Object[] row : exitStaff) {
+            Long id = (Long) row[0];
+            String name = (String) row[1];
+            long count = (Long) row[2];
+            map.computeIfAbsent(id, k -> new StaffActivity(id, name, 0, 0)).setExitsRecorded(count);
+        }
+
+        return new ArrayList<>(map.values());
     }
 
     private List<VehicleTypeCount> mapCounts(List<Object[]> raw) {
