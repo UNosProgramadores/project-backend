@@ -73,9 +73,10 @@ public class EntryRecordService {
         this.invoiceRepository = invoiceRepository;
     }
 
-    private Vehicle findOrCreateVehicle(String plate, String bikeRegistration, Long vehicleTypeId) {
+    private Vehicle findOrCreateVehicle(String plate, String bikeRegistration, Long vehicleTypeId, String ownerDocument) {
+        Vehicle vehicle;
         if (plate != null && !plate.isBlank()) {
-            return vehicleRepository.findByPlate(plate).orElseGet(() -> {
+            vehicle = vehicleRepository.findByPlate(plate).orElseGet(() -> {
                 if (vehicleTypeId == null) {
                     throw new RuntimeException("vehicleTypeId es requerido");
                 }
@@ -91,10 +92,8 @@ public class EntryRecordService {
                 v.setActive(true);
                 return vehicleRepository.save(v);
             });
-        }
-
-        if (bikeRegistration != null && !bikeRegistration.isBlank()) {
-            return vehicleRepository.findByBikeRegistration(bikeRegistration).orElseGet(() -> {
+        } else if (bikeRegistration != null && !bikeRegistration.isBlank()) {
+            vehicle = vehicleRepository.findByBikeRegistration(bikeRegistration).orElseGet(() -> {
                 if (vehicleTypeId == null) {
                     throw new RuntimeException("vehicleTypeId es requerido");
                 }
@@ -110,9 +109,21 @@ public class EntryRecordService {
                 v.setActive(true);
                 return vehicleRepository.save(v);
             });
+        } else {
+            throw new RuntimeException("Placa o registro de bicicleta es requerido");
         }
 
-        throw new RuntimeException("Placa o registro de bicicleta es requerido");
+        assignOwnerIfPresent(vehicle, ownerDocument);
+        return vehicle;
+    }
+
+    private void assignOwnerIfPresent(Vehicle vehicle, String ownerDocument) {
+        if (ownerDocument != null && !ownerDocument.isBlank()) {
+            User owner = userRepository.findByDocumentAndRole_Name(ownerDocument, "customer")
+                    .orElseThrow(() -> new RuntimeException("No se encontró un cliente con documento: " + ownerDocument));
+            vehicle.setOwner(owner);
+            vehicleRepository.save(vehicle);
+        }
     }
 
     @Transactional
@@ -125,7 +136,7 @@ public class EntryRecordService {
         );
 
         Vehicle vehicle = findOrCreateVehicle(
-                request.getPlate(), request.getBikeRegistration(), request.getVehicleTypeId()
+                request.getPlate(), request.getBikeRegistration(), request.getVehicleTypeId(), request.getOwnerDocument()
         );
         entryRecordRepository.findByVehicleAndStatus(
                 vehicle,

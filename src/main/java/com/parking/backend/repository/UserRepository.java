@@ -20,5 +20,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByDocument(String document);
 
     List<User> findByRole_NameAndParkingLot_Id(String roleName, Long parkingLotId);
+    Optional<User> findByDocumentAndRole_Name(String document, String roleName);
 }
 

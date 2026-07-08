@@ -72,6 +72,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/parking-lots/*/invoices").hasAnyRole("ADMIN", "STAFF")
                         .requestMatchers("/api/parking-lots/*/payments/**").hasAnyRole("ADMIN", "STAFF")
                         .requestMatchers("/api/parking-lots/*/reports/**").hasRole("ADMIN")    // RF_25: solo dueño/administrador
+                        .requestMatchers(HttpMethod.GET, "/api/customers/me/**").hasRole("CUSTOMER")
+                        .requestMatchers("/api/customers/**").hasAnyRole("ADMIN", "STAFF")
                         .requestMatchers("/api/invoices/**").hasAnyRole("ADMIN", "STAFF")
 
                         .requestMatchers(HttpMethod.GET, "/api/parking-lots/**").permitAll()

@@ -11,6 +11,7 @@ public class VehicleEntryRequest {
     private Long vehicleTypeId;
     private String plate;
     private String bikeRegistration;
+    private String ownerDocument;
     private Long cellId;
 
     public Long getParkingLotId() {
@@ -43,6 +44,14 @@ public class VehicleEntryRequest {
 
     public void setBikeRegistration(String bikeRegistration) {
         this.bikeRegistration = bikeRegistration;
+    }
+
+    public String getOwnerDocument() {
+        return ownerDocument;
+    }
+
+    public void setOwnerDocument(String ownerDocument) {
+        this.ownerDocument = ownerDocument;
     }
 
     public Long getCellId() {
