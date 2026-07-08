@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/staff")
 public class StaffController {
@@ -16,6 +18,12 @@ public class StaffController {
 
     public StaffController(StaffService staffService) {
         this.staffService = staffService;
+    }
+
+    @GetMapping
+    public ResponseEntity<?> getAllStaff(@RequestParam Long parkingLotId) {
+        List<User> staff = staffService.getAllStaff(parkingLotId);
+        return ResponseEntity.ok(staff);
     }
 
     @PostMapping

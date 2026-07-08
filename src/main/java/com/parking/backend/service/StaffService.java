@@ -10,6 +10,7 @@ import com.parking.backend.repository.UserRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class StaffService {
@@ -54,6 +55,10 @@ public class StaffService {
         user.setCreatedAt(LocalDateTime.now());
 
         return userRepository.save(user);
+    }
+
+    public List<User> getAllStaff(Long parkingLotId) {
+        return userRepository.findByRole_NameAndParkingLot_Id("staff", parkingLotId);
     }
 
     public User unlockUser(Long userId) {
