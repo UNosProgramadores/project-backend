@@ -49,14 +49,14 @@ public class Vehicle {
         return plate;
     }
     public void setPlate(String plate) {
-        this.plate = plate;
+        this.plate = plate != null ? plate.trim().toUpperCase() : null;
     }
 
     public String getBikeRegistration() {
         return bikeRegistration;
     }
     public void setBikeRegistration(String bikeRegistration) {
-        this.bikeRegistration = bikeRegistration;
+        this.bikeRegistration = bikeRegistration != null ? bikeRegistration.trim().toUpperCase() : null;
     }
 
     public User getOwner() {
