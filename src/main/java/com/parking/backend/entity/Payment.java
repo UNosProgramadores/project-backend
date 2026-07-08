@@ -39,6 +39,12 @@ public class Payment {
     @Column(name = "external_invoice_ref")
     private String externalInvoiceRef;
 
+    @Column(name = "rate_type")
+    private String rateType;
+
+    @Column(name = "rate_value")
+    private BigDecimal rateValue;
+
     public Long getId() {
         return id;
     }
@@ -100,5 +106,19 @@ public class Payment {
     }
     public void setExternalInvoiceRef(String externalInvoiceRef) {
         this.externalInvoiceRef = externalInvoiceRef;
+    }
+
+    public String getRateType() {
+        return rateType;
+    }
+    public void setRateType(String rateType) {
+        this.rateType = rateType;
+    }
+
+    public BigDecimal getRateValue() {
+        return rateValue;
+    }
+    public void setRateValue(BigDecimal rateValue) {
+        this.rateValue = rateValue;
     }
 }

@@ -36,6 +36,27 @@ public interface EntryRecordRepository extends JpaRepository<EntryRecord, Long> 
            "AND er.status = 'completed' " +
            "GROUP BY er.vehicle.vehicleType.name")
     List<Object[]> countExitsByVehicleTypeAndDateRange(@Param("parkingLotId") Long parkingLotId,
-                                                        @Param("start") LocalDateTime start,
-                                                        @Param("end") LocalDateTime end);
+                                                         @Param("start") LocalDateTime start,
+                                                         @Param("end") LocalDateTime end);
+
+    @Query("SELECT er.recordedBy.id, er.recordedBy.name, COUNT(er) " +
+           "FROM EntryRecord er " +
+           "WHERE er.cell.parkingLot.id = :parkingLotId " +
+           "AND er.recordedBy IS NOT NULL " +
+           "AND er.entryTime >= :start AND er.entryTime < :end " +
+           "GROUP BY er.recordedBy.id, er.recordedBy.name")
+    List<Object[]> countEntriesByStaff(@Param("parkingLotId") Long parkingLotId,
+                                       @Param("start") LocalDateTime start,
+                                       @Param("end") LocalDateTime end);
+
+    @Query("SELECT er.recordedBy.id, er.recordedBy.name, COUNT(er) " +
+           "FROM EntryRecord er " +
+           "WHERE er.cell.parkingLot.id = :parkingLotId " +
+           "AND er.recordedBy IS NOT NULL " +
+           "AND er.status = 'completed' " +
+           "AND er.exitTime >= :start AND er.exitTime < :end " +
+           "GROUP BY er.recordedBy.id, er.recordedBy.name")
+    List<Object[]> countExitsByStaff(@Param("parkingLotId") Long parkingLotId,
+                                     @Param("start") LocalDateTime start,
+                                     @Param("end") LocalDateTime end);
 }

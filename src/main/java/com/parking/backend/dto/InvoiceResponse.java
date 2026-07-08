@@ -24,6 +24,8 @@ public class InvoiceResponse {
     private BigDecimal totalPaid;
     private String paymentMethod;
     private String cellCode;
+    private String rateType;
+    private BigDecimal rateValue;
 
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
@@ -70,6 +72,12 @@ public class InvoiceResponse {
     public String getCellCode() { return cellCode; }
     public void setCellCode(String cellCode) { this.cellCode = cellCode; }
 
+    public String getRateType() { return rateType; }
+    public void setRateType(String rateType) { this.rateType = rateType; }
+
+    public BigDecimal getRateValue() { return rateValue; }
+    public void setRateValue(BigDecimal rateValue) { this.rateValue = rateValue; }
+
     public static InvoiceResponse fromEntity(Invoice invoice) {
         Payment payment = invoice.getPayment();
         EntryRecord record = payment.getEntryRecord();
@@ -90,6 +98,8 @@ public class InvoiceResponse {
         res.setTotalPaid(payment.getTotalPaid());
         res.setPaymentMethod(payment.getPaymentMethod());
         res.setCellCode(record.getCell().getCode());
+        res.setRateType(payment.getRateType());
+        res.setRateValue(payment.getRateValue());
         return res;
     }
 }

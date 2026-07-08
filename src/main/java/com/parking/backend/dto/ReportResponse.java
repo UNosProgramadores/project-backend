@@ -16,6 +16,7 @@ public class ReportResponse {
     private long totalExits;
     private List<VehicleTypeCount> entriesByVehicleType;
     private List<VehicleTypeCount> exitsByVehicleType;
+    private List<StaffActivity> staffActivity;
 
     public Long getParkingLotId() { return parkingLotId; }
     public void setParkingLotId(Long parkingLotId) { this.parkingLotId = parkingLotId; }
@@ -49,6 +50,37 @@ public class ReportResponse {
 
     public List<VehicleTypeCount> getExitsByVehicleType() { return exitsByVehicleType; }
     public void setExitsByVehicleType(List<VehicleTypeCount> exitsByVehicleType) { this.exitsByVehicleType = exitsByVehicleType; }
+
+    public List<StaffActivity> getStaffActivity() { return staffActivity; }
+    public void setStaffActivity(List<StaffActivity> staffActivity) { this.staffActivity = staffActivity; }
+
+    public static class StaffActivity {
+        private Long staffId;
+        private String staffName;
+        private long entriesRecorded;
+        private long exitsRecorded;
+
+        public StaffActivity() {}
+
+        public StaffActivity(Long staffId, String staffName, long entriesRecorded, long exitsRecorded) {
+            this.staffId = staffId;
+            this.staffName = staffName;
+            this.entriesRecorded = entriesRecorded;
+            this.exitsRecorded = exitsRecorded;
+        }
+
+        public Long getStaffId() { return staffId; }
+        public void setStaffId(Long staffId) { this.staffId = staffId; }
+
+        public String getStaffName() { return staffName; }
+        public void setStaffName(String staffName) { this.staffName = staffName; }
+
+        public long getEntriesRecorded() { return entriesRecorded; }
+        public void setEntriesRecorded(long entriesRecorded) { this.entriesRecorded = entriesRecorded; }
+
+        public long getExitsRecorded() { return exitsRecorded; }
+        public void setExitsRecorded(long exitsRecorded) { this.exitsRecorded = exitsRecorded; }
+    }
 
     public static class VehicleTypeCount {
         private String vehicleType;
