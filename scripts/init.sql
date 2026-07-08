@@ -106,8 +106,10 @@ CREATE TABLE "payment" (
                            "discount_amount" decimal,
                            "total_paid" decimal,
                            "payment_method" varchar,
-                           "payment_date" timestamp,
-                           "external_invoice_ref" varchar
+                            "payment_date" timestamp,
+                            "external_invoice_ref" varchar,
+                            "rate_type" varchar,
+                            "rate_value" decimal
 );
 
 CREATE TABLE "invoice" (
