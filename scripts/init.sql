@@ -59,7 +59,8 @@ CREATE TABLE "cell" (
                         "cell_type" varchar,
                         "status" varchar,
                         "vehicle_type_id" bigint,
-                        "reserved_for_staff" boolean
+                        "reserved_for_staff" boolean,
+                        "active" boolean NOT NULL DEFAULT true
 );
 
 CREATE TABLE "rate" (
