@@ -5,13 +5,15 @@ import com.parking.backend.entity.Rate;
 import com.parking.backend.entity.VehicleType;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.Optional;
+import java.util.List;
 
 public interface RateRepository extends JpaRepository<Rate, Long> {
 
-    Optional<Rate> findByParkingLotAndVehicleTypeAndActive(
+    List<Rate> findByParkingLotAndVehicleTypeAndActive(
             ParkingLot parkingLot,
             VehicleType vehicleType,
             Boolean active
     );
+
+    List<Rate> findByParkingLot(ParkingLot parkingLot);
 }

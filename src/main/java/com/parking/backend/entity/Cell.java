@@ -19,7 +19,7 @@ public class Cell {
     @Column(name = "col")
     private Integer col;
 
-    // Human-readable code shown in the map UI, e.g. "C-10", "M-23", "B-14"
+    // Positional code "row-col" (0-indexed), set once at creation, never changes
     private String code;
 
     // "parking" or "transit"
@@ -36,6 +36,9 @@ public class Cell {
 
     @Column(name = "reserved_for_staff")
     private Boolean reservedForStaff;
+
+    @Column(nullable = false)
+    private Boolean active = true;
 
     public Long getId() {
         return id;
@@ -98,5 +101,12 @@ public class Cell {
     }
     public void setReservedForStaff(Boolean reservedForStaff) {
         this.reservedForStaff = reservedForStaff;
+    }
+
+    public Boolean getActive() {
+        return active;
+    }
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 }

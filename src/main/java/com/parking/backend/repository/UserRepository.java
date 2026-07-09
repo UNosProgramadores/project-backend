@@ -5,6 +5,7 @@ import com.parking.backend.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -17,5 +18,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByUsername(String username);
 
     boolean existsByDocument(String document);
+
+    List<User> findByRole_NameAndParkingLot_Id(String roleName, Long parkingLotId);
+    Optional<User> findByDocumentAndRole_Name(String document, String roleName);
 }
 

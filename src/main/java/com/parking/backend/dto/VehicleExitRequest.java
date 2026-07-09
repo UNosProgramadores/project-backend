@@ -1,9 +1,32 @@
 package com.parking.backend.dto;
 
+import jakarta.validation.constraints.AssertTrue;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 public class VehicleExitRequest {
+
+    @NotNull(message = "El id del parqueadero es requerido")
+    private Long parkingLotId;
 
     private String plate;
     private String bikeRegistration;
+
+    @NotBlank(message = "El método de pago es requerido")
+    private String paymentMethod;
+
+    @AssertTrue(message = "Debe proporcionar placa o registro de bicicleta")
+    private boolean isPlateOrBikeRegistrationProvided() {
+        return (plate != null && !plate.isBlank()) || (bikeRegistration != null && !bikeRegistration.isBlank());
+    }
+
+    public Long getParkingLotId() {
+        return parkingLotId;
+    }
+
+    public void setParkingLotId(Long parkingLotId) {
+        this.parkingLotId = parkingLotId;
+    }
 
     public String getPlate() {
         return plate;
@@ -19,5 +42,13 @@ public class VehicleExitRequest {
 
     public void setBikeRegistration(String bikeRegistration) {
         this.bikeRegistration = bikeRegistration;
+    }
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
     }
 }

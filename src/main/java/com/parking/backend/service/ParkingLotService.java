@@ -1,20 +1,28 @@
 package com.parking.backend.service;
 
 import com.parking.backend.dto.ParkingLotRequest;
+import com.parking.backend.entity.Cell;
 import com.parking.backend.entity.ParkingLot;
+import com.parking.backend.repository.CellRepository;
 import com.parking.backend.repository.ParkingLotRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class ParkingLotService {
 
     private final ParkingLotRepository parkingLotRepository;
+    private final CellRepository cellRepository;
 
-    public ParkingLotService(ParkingLotRepository parkingLotRepository) {
+    public ParkingLotService(ParkingLotRepository parkingLotRepository,
+                             CellRepository cellRepository) {
         this.parkingLotRepository = parkingLotRepository;
+        this.cellRepository = cellRepository;
     }
 
     public List<ParkingLot> getAll() {
@@ -33,7 +41,9 @@ public class ParkingLotService {
         ParkingLot parkingLot = new ParkingLot();
         updateEntityFromRequest(parkingLot, request);
 
-        return parkingLotRepository.save(parkingLot);
+        parkingLot = parkingLotRepository.save(parkingLot);
+        generateCells(parkingLot, request.getRows(), request.getColumns());
+        return parkingLot;
     }
 
     @Transactional
@@ -41,9 +51,20 @@ public class ParkingLotService {
         validateHours(request);
 
         ParkingLot parkingLot = getById(id);
+        int oldRows = parkingLot.getRows();
+        int oldCols = parkingLot.getColumns();
         updateEntityFromRequest(parkingLot, request);
 
-        return parkingLotRepository.save(parkingLot);
+        parkingLot = parkingLotRepository.save(parkingLot);
+        syncCells(parkingLot, request.getRows(), request.getColumns(), oldRows, oldCols);
+        return parkingLot;
+    }
+
+    @Transactional
+    public ParkingLot toggleDiscountsEnabled(Long id) {
+        ParkingLot lot = getById(id);
+        lot.setDiscountsEnabled(!Boolean.TRUE.equals(lot.getDiscountsEnabled()));
+        return parkingLotRepository.save(lot);
     }
 
     @Transactional
@@ -70,5 +91,64 @@ public class ParkingLotService {
         entity.setColumns(request.getColumns());
         entity.setAutoAssignment(request.getAutoAssignment());
         entity.setDiscountsEnabled(request.getDiscountsEnabled());
+    }
+
+    private void generateCells(ParkingLot lot, int rows, int columns) {
+        List<Cell> cells = new ArrayList<>();
+        for (int r = 1; r <= rows; r++) {
+            for (int c = 1; c <= columns; c++) {
+                cells.add(createCell(lot, r, c));
+            }
+        }
+        cellRepository.saveAll(cells);
+    }
+
+    // ponytail: hide out-of-bounds cells by setting row/col to -1 instead of deleting
+    private void syncCells(ParkingLot lot, int newRows, int newCols, int oldRows, int oldCols) {
+        List<Cell> existing = cellRepository.findByParkingLot(lot);
+
+        if (newRows < oldRows || newCols < oldCols) {
+            boolean anyOccupied = existing.stream()
+                    .anyMatch(c -> "occupied".equals(c.getStatus()));
+            if (anyOccupied) {
+                throw new RuntimeException("No se puede reducir el tamaño: el parqueadero tiene vehículos ocupando celdas. Debe estar vacío.");
+            }
+            for (Cell c : existing) {
+                if (c.getRow() >= newRows || c.getCol() >= newCols) {
+                    c.setRow(-1);
+                    c.setCol(-1);
+                    c.setActive(false);
+                }
+            }
+            cellRepository.saveAll(existing);
+        }
+
+        if (newRows > oldRows || newCols > oldCols || existing.size() < newRows * newCols) {
+            Set<String> existingPos = existing.stream()
+                    .map(c -> c.getRow() + "," + c.getCol())
+                    .collect(Collectors.toSet());
+            List<Cell> newCells = new ArrayList<>();
+            for (int r = 0; r < newRows; r++) {
+                for (int c = 0; c < newCols; c++) {
+                    if (!existingPos.contains(r + "," + c)) {
+                        newCells.add(createCell(lot, r + 1, c + 1));
+                    }
+                }
+            }
+            cellRepository.saveAll(newCells);
+        }
+    }
+
+    private Cell createCell(ParkingLot lot, int row, int col) {
+        Cell cell = new Cell();
+        cell.setParkingLot(lot);
+        cell.setRow(row - 1);
+        cell.setCol(col - 1);
+        cell.setCode(cell.getRow() + "-" + cell.getCol());
+        cell.setCellType("parking");
+        cell.setStatus("available");
+        cell.setReservedForStaff(false);
+        cell.setActive(true);
+        return cell;
     }
 }
