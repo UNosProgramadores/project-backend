@@ -149,4 +149,4 @@ project-backend/
 
 ### Gracias por ver :)
 
-https://docs.google.com/presentation/d/1uSWJbTZAvk7XzXV6JH_OCKCCbY0rUS-i8aD2ZzhhGck/edit?usp=sharing
+https://canva.link/q32mi2hnxtl6eop
